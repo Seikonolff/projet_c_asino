@@ -6,7 +6,7 @@
 #define RED 0
 #define BLACK 1
 
-int main() {
+void roulette_game() {
     int balance = 1000;
     int bet;
     int number;
@@ -100,5 +100,4 @@ int main() {
 
     printf("Votre solde final est de %d $. Merci d'avoir joué !\n", balance);
 
-    return 0;
 }

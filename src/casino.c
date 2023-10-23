@@ -21,8 +21,8 @@ void start_game(GameType game_type)
     case SLOTS :
         break;
 
-    case ROULETTE :
-    break;
+    //case ROULETTE :
+    //break;
     
     default:
         break;

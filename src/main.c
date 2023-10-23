@@ -23,6 +23,7 @@ int main() {
             case 2:
                 // Ajoutez la logique pour jouer au blackjack
                 printf("Vous avez choisi Blackjack.\n");
+                blackjack_game();
                 // Exemple: play_blackjack();
                 break;
             case 3:

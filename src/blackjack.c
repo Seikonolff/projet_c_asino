@@ -1,4 +1,5 @@
 #include "blackjack.h"
+#include<stdio.h>
 #include <stdlib.h> // pour rand() et srand()
 #include <time.h> // pour time()
 
@@ -9,7 +10,7 @@ int tirerCarte() {
     return rand() % 11 + 1;
 }
 
-int main() {
+void blackjack_game() {
     // Initialisation du générateur de nombres aléatoires.
     srand(time(NULL));
 
@@ -22,7 +23,7 @@ int main() {
 
     if (nombreJoueurs < 1 || nombreJoueurs > MAX_JOUEURS) {
         printf("Nombre de joueurs non valide.\n");
-        return 1;
+        return;
     }
 
     // Distribution des cartes initiales pour chaque joueur et le croupier.
@@ -46,7 +47,6 @@ int main() {
         printf("Main du joueur %d : %d\n", i + 1, totalJoueurs[i]);
     }
 
-    printf("Main du croupier : %d\n\n", totalCroupier);
 
     // Tours des joueurs.
     for (int i = 0; i < nombreJoueurs; i++) {
@@ -65,7 +65,7 @@ int main() {
             }
         }
     }
-
+    printf("Main du croupier : %d\n\n", totalCroupier);
     // Tour du croupier.
     while (totalCroupier < 17) {
         int nouvelleCarte = tirerCarte();
@@ -87,5 +87,4 @@ int main() {
         }
     }
 
-    return 0;
 }
