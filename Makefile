@@ -1,2 +1,2 @@
 all:
-	gcc -Isrc/Include -Lsrc/lib -o main main.c -lmingw32 -lSDL2main -lSDL2
+	gcc -o ../bin/casino_game main.c casino.c poker.c blackjack.c slots.c -I../include
