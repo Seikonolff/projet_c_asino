@@ -6,6 +6,5 @@
 
 void poker_game()
 {
-    printf("ca joue au poker ou quoi la");
-    return;
+    printf("ca joue au poker ou quoi la ? \n");
 }

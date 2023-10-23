@@ -5,15 +5,17 @@ typedef enum {
     POKER,
     BLACKJACK,
     SLOTS,
+    ROULETTE,
 } GameType;
 
 typedef struct {
+    //str name;
     int credits;
 } Player;
 
 void initialize_casino();
+int lobby(void);
 void start_game(GameType game_type);
-void handle_game_logic();
 void update_player_credits(int amount);
 void shutdown_casino();
 
