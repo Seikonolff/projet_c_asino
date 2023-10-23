@@ -1,8 +1,0 @@
-{
-    "files.associations": {
-        "time.h": "c",
-        "poker.h": "c",
-        "blackjack.h": "c",
-        "slots.h": "c"
-    }
-}
