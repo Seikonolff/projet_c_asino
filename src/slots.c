@@ -26,9 +26,14 @@ int stack = initial_stack;
 int playerbet;
 int gain;
 
+void init_aleatoire()
+{
+    srand(time(NULL));
+}
+
 int tirage_slot()
 {
-    srand(time(NULL)); //redemarrage du timer pour plus d'aléatoire
+    //srand(time(NULL)); //redemarrage du timer pour plus d'aléatoire
     //rouleaux[rouleau].item = rand()%4;
     //return rouleaux[rouleau].item;
     return rand()%nombre_item;
@@ -66,6 +71,7 @@ void slots_game()
     printf("Combien voulez vous misez ?\n");
     scanf("%d", &playerbet);
     init_rouleaux();
+    init_aleatoire();
     for (int i = 1; i< nombre_rouleaux; i++)
     {
         rouleaux[i].item = tirage_slot();
