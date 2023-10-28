@@ -5,6 +5,7 @@
 
 #define MAX_JOUEURS 4
 
+
 // Fonction pour tirer une carte aléatoire entre 1 et 11 (as vaut 11 par défaut).
 int tirerCarte() {
     return rand() % 11 + 1;
@@ -17,6 +18,9 @@ void blackjack_game() {
     int totalJoueurs[MAX_JOUEURS] = {0};
     int totalCroupier = 0;
     int nombreJoueurs;
+    int joueurstack = 1000;
+    int kdo;
+    int mise;
 
     printf("Entrez le nombre de joueurs (1-%d) : ", MAX_JOUEURS);
     scanf("%d", &nombreJoueurs);
@@ -25,7 +29,8 @@ void blackjack_game() {
         printf("Nombre de joueurs non valide.\n");
         return;
     }
-
+    printf("Quel est votre mise ?");
+    scanf("%d", &mise);
     // Distribution des cartes initiales pour chaque joueur et le croupier.
     for (int i = 0; i < nombreJoueurs; i++) {
         totalJoueurs[i] += tirerCarte();
@@ -80,6 +85,9 @@ void blackjack_game() {
             printf("Joueur %d a dépassé 21. Le croupier gagne.\n", i + 1);
         } else if (totalCroupier > 21 || totalJoueurs[i] > totalCroupier) {
             printf("Joueur %d gagne !\n", i + 1);
+            kdo = mise*2;
+            joueurstack += kdo;
+            printf("Votre stack est maintenant de: %d\n",joueurstack);
         } else if (totalCroupier > totalJoueurs[i]) {
             printf("Le croupier gagne contre joueur %d.\n", i + 1);
         } else {

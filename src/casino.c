@@ -11,7 +11,7 @@ Player player;
 void initialize_casino()
 {
     //player.name += "";
-    player.credits = 1000;
+    int credits = 1000;
 }
 
 int lobby()
