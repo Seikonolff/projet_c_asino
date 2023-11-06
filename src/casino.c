@@ -72,7 +72,7 @@ void start_game(GameType game_type) // à voir si on garde cette fonction elle p
         break;
 
     case ROULETTE :
-        //roulette_game();
+        roulette_game();
         break;
     
     default:

@@ -35,12 +35,12 @@ int userbet(int balance) {
 int getBetType() {
     int betType;
     printf("Choisissez un type de mise :\n");
-    printf("1. Chiffre spécifique\n");
+    printf("1. Chiffre specifique\n");
     printf("2. Rouge\n");
     printf("3. Noir\n");
     printf("4. Tiers (1-12, 13-24, 25-36)\n");
-    printf("5. Cheval (deux numéros adjacents)\n");
-    printf("6. Carré (quatre numéros en carré)\n");
+    printf("5. Cheval (deux numeros adjacents)\n");
+    printf("6. Carre (quatre numeros en carre)\n");
     scanf("%d", &betType);
     return betType;
 }
@@ -120,9 +120,9 @@ bool areAdjacent(int num1, int num2) {
 
 void getChevalNumbers(int *num1, int *num2) {
     do {
-        printf("Entrez le premier numéro (1-36) : ");
+        printf("Entrez le premier numero (1-36) : ");
         scanf("%d", num1);
-        printf("Entrez le deuxième numéro (1-36) : ");
+        printf("Entrez le deuxième numero (1-36) : ");
         scanf("%d", num2);
     } while (!areAdjacent(*num1, *num2));
 }
@@ -136,7 +136,7 @@ void getCarreNumbers(int *num1, int *num2, int *num3, int *num4) {
         *num4 = *num1 + 4;
     } while (!(*num1 <= 34 && areAdjacent(*num1, *num2) && areAdjacent(*num1, *num3) && areAdjacent(*num2, *num4) && areAdjacent(*num3, *num4)));
     
-    printf("Vous avez choisi le carré : %d, %d, %d, %d\n", *num1, *num2, *num3, *num4);
+    printf("Vous avez choisi le carre : %d, %d, %d, %d\n", *num1, *num2, *num3, *num4);
 }
 
 
@@ -175,7 +175,7 @@ void evaluateResult(int betType, int bet, int number, int color, int tier, int n
     }
 
     if (win > 0) {
-        printf("Vous avez gagné %d!\n", win);
+        printf("Vous avez gagne %d!\n", win);
         *balance += win;
     } else {
         printf("Vous avez perdu votre mise.\n");
@@ -186,7 +186,7 @@ void evaluateResult(int betType, int bet, int number, int color, int tier, int n
 void roulette_game() {
     int balance = 1000;
 
-    printf("Bienvenue à la roulette! Vous avez %d pièces.\n", balance);
+    printf("Bienvenue à la roulette! Vous avez %d pieces.\n", balance);
 
     while (balance > 0) {
         int bet = userbet(balance);
@@ -218,9 +218,9 @@ void roulette_game() {
         int winningNumber = getWinningNumber();
         evaluateResult(betType, bet, number, color, tier, numCheval1, numCheval2, carreNum1, carreNum2, carreNum3, carreNum4, winningNumber, &balance);
 
-        printf("Votre solde est maintenant de %d pièces.\n", balance);
+        printf("Votre solde est maintenant de %d pieces.\n", balance);
     }
 
-    printf("Merci d'avoir joué à la roulette!");
+    printf("Merci d'avoir joue à la roulette!");
 }
 
