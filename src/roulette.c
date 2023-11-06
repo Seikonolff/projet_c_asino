@@ -41,9 +41,12 @@ int getBetType() {
     printf("4. Tiers (1-12, 13-24, 25-36)\n");
     printf("5. Cheval (deux numeros adjacents)\n");
     printf("6. Carre (quatre numeros en carre)\n");
+    printf("7. Colonne (premiere, deuxieme, troisieme)\n");
+    printf("8. Deux colonnes adjacentes\n");
     scanf("%d", &betType);
     return betType;
 }
+
 
 int getSpecificNumber() {
     int number;
@@ -69,7 +72,7 @@ int getTier() {
 
 int getWinningNumber() {
     int winningNumber = rand() % 37;
-    printf("La roulette tourne... Le numéro gagnant est : %d\n", winningNumber);
+    printf("La roulette tourne... Le numero gagnant est : %d\n", winningNumber);
     return winningNumber;
 }
 
@@ -128,19 +131,55 @@ void getChevalNumbers(int *num1, int *num2) {
 }
 
 void getCarreNumbers(int *num1, int *num2, int *num3, int *num4) {
+    bool isValidSquare;
     do {
-        printf("Entrez le premier numéro (haut gauche) du carré (1-33) : ");
+        printf("Entrez le premier numero (bas gauche) du carre (1-32) : ");
         scanf("%d", num1);
-        *num2 = *num1 + 1;
-        *num3 = *num1 + 3;
-        *num4 = *num1 + 4;
-    } while (!(*num1 <= 34 && areAdjacent(*num1, *num2) && areAdjacent(*num1, *num3) && areAdjacent(*num2, *num4) && areAdjacent(*num3, *num4)));
+        
+        // Vérifie si num1 est dans la dernière colonne (les numéros 3, 6, 9, ..., 36)
+        bool isLastColumn = (*num1 % 3 == 0);
+        // Vérifie si num1 est dans les deux dernières lignes (les numéros 31-36)
+        bool isLastRow = *num1 > 32;
+
+        // Le carré est valide si num1 n'est pas dans la dernière colonne et pas dans les deux dernières lignes
+        isValidSquare = !isLastColumn && !isLastRow;
+        
+        if (!isValidSquare) {
+            printf("Numero invalide pour un carre. Veuillez choisir un autre numero.\n");
+        }
+    } while (!isValidSquare);
+
+    // Les numéros qui forment le carré 
+    *num2 = *num1 + 1;
+    *num3 = *num1 + 3;
+    *num4 = *num1 + 4;
     
     printf("Vous avez choisi le carre : %d, %d, %d, %d\n", *num1, *num2, *num3, *num4);
 }
 
+int getColumn() {
+    int column;
+    do {
+        printf("Choisissez une colonne (1 pour la premiere, 2 pour la deuxieme, 3 pour la troisieme) : ");
+        scanf("%d", &column);
+    } while (column < 1 || column > 3);
+    return column;
+}
 
-void evaluateResult(int betType, int bet, int number, int color, int tier, int numCheval1, int numCheval2, int carreNum1, int carreNum2, int carreNum3, int carreNum4, int winningNumber, int *balance) {
+int getTwoColumns() {
+    int columnsChoice;
+    do {
+        printf("Choisissez deux colonnes adjacentes :\n");
+        printf("1 pour la premiere et la deuxieme colonne\n");
+        printf("2 pour la deuxieme et la troisieme colonne\n");
+        scanf("%d", &columnsChoice);
+    } while (columnsChoice < 1 || columnsChoice > 2);
+    return columnsChoice;
+}
+
+
+
+void evaluateResult(int betType, int bet, int number, int color, int tier, int numCheval1, int numCheval2, int carreNum1, int carreNum2, int carreNum3, int carreNum4, int column, int columnsChoice, int winningNumber, int *balance) {
     int win = 0;
 
     switch (betType) {
@@ -172,6 +211,22 @@ void evaluateResult(int betType, int bet, int number, int color, int tier, int n
                 win = bet * 9;
             }
             break;
+
+
+        case 7: 
+            if ((column == 1 && winningNumber % 3 == 1) ||
+                (column == 2 && winningNumber % 3 == 2) ||
+                (column == 3 && winningNumber % 3 == 0 && winningNumber != 0)) {
+                win = bet * 3;
+            }
+            break;
+
+        case 8: 
+            if ((columnsChoice == 1 && (winningNumber % 3 == 1 || winningNumber % 3 == 2)) ||
+                (columnsChoice == 2 && (winningNumber % 3 == 2 || (winningNumber % 3 == 0 && winningNumber != 0)))) {
+                win = bet * 2; 
+            }
+            break;
     }
 
     if (win > 0) {
@@ -185,7 +240,7 @@ void evaluateResult(int betType, int bet, int number, int color, int tier, int n
 
 void roulette_game() {
     int balance = 1000;
-
+    srand((unsigned int)time(NULL));
     printf("Bienvenue à la roulette! Vous avez %d pieces.\n", balance);
 
     while (balance > 0) {
@@ -193,8 +248,8 @@ void roulette_game() {
         if (bet == 0) break;
 
         int betType = getBetType();
-
-        int number = 0, color = 0, tier = 0, numCheval1 = 0, numCheval2 = 0, carreNum1 = 0, carreNum2 = 0, carreNum3 = 0, carreNum4 = 0;
+        int number = 0, color = 0, tier = 0, numCheval1 = 0, numCheval2 = 0, carreNum1 = 0, carreNum2 = 0, carreNum3 = 0, carreNum4 = 0; 
+        int column = 0, twoColumnsChoice = 0;
 
         switch (betType) {
             case 1:
@@ -213,14 +268,19 @@ void roulette_game() {
             case 6:
                 getCarreNumbers(&carreNum1, &carreNum2, &carreNum3, &carreNum4);
                 break;
+            case 7:
+                column = getColumn();
+                break;
+            case 8:
+                twoColumnsChoice = getTwoColumns();
+                break;
         }
 
         int winningNumber = getWinningNumber();
-        evaluateResult(betType, bet, number, color, tier, numCheval1, numCheval2, carreNum1, carreNum2, carreNum3, carreNum4, winningNumber, &balance);
-
+        evaluateResult(betType, bet, number, color, tier, numCheval1, numCheval2, carreNum1, carreNum2, carreNum3, carreNum4, column, twoColumnsChoice, winningNumber, &balance);
         printf("Votre solde est maintenant de %d pieces.\n", balance);
     }
 
-    printf("Merci d'avoir joue à la roulette!");
+    printf("Merci d'avoir joue a la roulette!");
 }
 
