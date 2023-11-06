@@ -14,6 +14,7 @@ void init_aleatoire(void);
 int tirage_slot(void);
 char* affichage_item(int rouleau);
 int check_results(void);
+int gain(int mise, int resultat);
 void slots_game(void);
 
 #endif //SLOTS_H

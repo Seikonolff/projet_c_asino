@@ -12,19 +12,17 @@
 
 slot rouleaux[nombre_rouleaux]; //définition d'un tableau rouleaux de 3 structures slot
 
+char* item0; //définition de l'item du rouleau X
+int stack = initial_stack;
+int playerbet;
+int profit;
+
 void init_rouleaux()
 {
 strcpy(rouleaux[0].nom_slot,"Rouleau 0");
 strcpy(rouleaux[1].nom_slot, "Rouleau 1");
 strcpy(rouleaux[2].nom_slot, "Rouleau 2");
 }
-
-char* item0; //définition de l'item du rouleau X
-
-//int stack = player.credits;
-int stack = initial_stack;
-int playerbet;
-int gain;
 
 void init_aleatoire()
 {
@@ -52,17 +50,25 @@ char* affichage_item(int rouleau)
 
 int check_results() 
 {
+    if (rouleaux[0].item == rouleaux[1].item && rouleaux[1].item == rouleaux[2].item)
+        {return 2;}
+
     if (rouleaux[0].item == rouleaux[1].item || rouleaux[1].item == rouleaux[2].item || rouleaux[2].item == rouleaux[0].item)
-    {
-        gain = 2*playerbet;
-        return gain;
-    }
+    {return 1;}
+
     if (rouleaux[0].item != rouleaux[1].item && rouleaux[1].item != rouleaux[2].item && rouleaux[2].item != rouleaux[0].item)
-    {
-        gain = 0;
-        return gain;
-    }
+    {return 0;}
     return 0; //no gair nor loss
+}
+
+int gain(int mise, int resultat){
+    switch (resultat)
+    {
+    case 0 : return 0; break;
+    case 1 : return 1.5*mise; break;
+    case 2 : return 10*mise; break;
+    default: break;
+    }
 }
 
 void slots_game()
@@ -84,7 +90,7 @@ void slots_game()
     init_aleatoire();
 
     for (int j=0; j<5; j++){
-    for (int i = 1; i< nombre_rouleaux; i++)
+    for (int i = 0; i< nombre_rouleaux; i++)
     {
         rouleaux[i].item = tirage_slot();
     }
@@ -92,16 +98,20 @@ void slots_game()
     sleep(0.1);
     }
 
-    check_results();
-    stack += gain;
-    if (gain !=0){
-        printf("Bravo ! Vous avez gagné %d $ \n", gain);
+    profit = gain(playerbet, check_results());
+    stack += profit;
+    if (check_results()==2){
+        printf("JACKPOT!!!!!\n");
+    }
+    if (profit !=0){
+        printf("Bravo ! Vous avez gagné %d $ \n", profit);
     }
     else{
+        printf("GAME OVER\n");
         printf("T'as perdu sale chien hahaha \n");
     }
     printf("Votre nouveau stack est %d $ \n", stack);
-    printf("Voulez vous continuer à jouer ? (o/n)");
+    printf("Voulez vous continuer à jouer ? (o/n)\n");
     scanf("%s",reponse);
 
     if(reponse[0]=='o'||reponse[0]=='O')//on regarde le premier cara de la chaine
@@ -110,8 +120,7 @@ void slots_game()
             printf("T'as plus d'argent, tu peux plus jouer!!\n");
             break;
             }
-            //on continue dans la boucle de jeu
-        }
+        }//on continue dans la boucle de jeu
     else {break;}
     /*
     if(reponse[0]=='n' || reponse[0]=='N'){
