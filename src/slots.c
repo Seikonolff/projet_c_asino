@@ -101,7 +101,7 @@ float slots_game(float stack)
         playerbet_int = (int)playerbet;
         while (playerbet != playerbet_int){
             printf("Le jeton le plus petit est 1$, vous ne pouvez pas miser des centimes.\nCombien voulez vous miser ?\n");
-            scanf("%f", playerbet);
+            scanf("%f", &playerbet);
         }
         printf("Votre mise est de %f $ \n", playerbet);
         stack -= playerbet;
@@ -129,7 +129,7 @@ float slots_game(float stack)
         }
         printf("Votre nouveau stack est %f $ \n", stack);
         printf("Voulez vous continuer à jouer ? (o/n)\n");
-        scanf("%s",reponse);
+        scanf("%s", &reponse);
 
         if(reponse[0]=='o'||reponse[0]=='O')//on regarde le premier cara de la chaine
             {
