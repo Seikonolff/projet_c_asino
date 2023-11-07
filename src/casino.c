@@ -44,7 +44,8 @@ int lobby()
                 break;
             case 3:
                 printf("Vous avez choisi Machine à sous.\n");
-                start_game(SLOTS);
+                //paystart_game(SLOTS);
+                player.credits = slots_game(player.credits);
                 break;
             case 4:
                 printf("Vous avez choisi Roulette");
