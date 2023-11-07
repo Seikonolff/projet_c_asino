@@ -1,8 +1,10 @@
 // Reste à faire 
 // -------> Interrupt pour chrono (RIEN NE VA PLUS).
+// -------> corriger bug d'entrée non integer dans la mise en place du bet ou du du type de bet
 // -------> V1.4 : Jouer à la roulette française avec un seul joueur mais en pouvant faire plusieurs paris sur un même tirage.
 // -------> V1.5 :1.5 : Pouvoir jouer à la roulette française seul avec toutes les règles du jeu et afficher les tirages précédents s'il y en a.
 // -------> V2: Modelisation graphique.
+// ------->
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -217,6 +219,9 @@ int getTwoLines() {
 
 void evaluateResult(int betType, int bet, int number, int color, int tier, int numCheval1, int numCheval2, int carreNum1, int carreNum2, int carreNum3, int carreNum4, int column, int columnsChoice, int lineChoice, int twoLinesChoice, int winningNumber, int *balance) {
     int win = 0;
+    int firstNumInLine;
+    int firstNumInTwoLines;
+    int lastNumInTwoLines;
 
     switch (betType) {
         case 1:
@@ -261,14 +266,14 @@ void evaluateResult(int betType, int bet, int number, int color, int tier, int n
             break;
 
         case 9: 
-            int firstNumInLine = (lineChoice - 1) * 3 + 1;
+            firstNumInLine = (lineChoice - 1) * 3 + 1;
             if (winningNumber >= firstNumInLine && winningNumber < firstNumInLine + 3) 
                 {win = bet * 11;}
             break;
 
         case 10: 
-            int firstNumInTwoLines = (twoLinesChoice - 1) * 3 + 1;
-            int lastNumInTwoLines = firstNumInTwoLines + 5; 
+            firstNumInTwoLines = (twoLinesChoice - 1) * 3 + 1;
+            lastNumInTwoLines = firstNumInTwoLines + 5; 
             if (winningNumber >= firstNumInTwoLines && winningNumber <= lastNumInTwoLines) 
                 {win = bet * 5;}
             break;
@@ -351,6 +356,11 @@ float roulette_game(float credits) {
             case 10:
                 twoLinesChoice = getTwoLines();
             break;
+            case 11:
+            case 12;
+            default:
+
+
         }
 
         int winningNumber = getWinningNumber();
