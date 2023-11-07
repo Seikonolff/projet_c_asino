@@ -2,6 +2,7 @@
 #include "pokerhandranking.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #define DECK_SIZE 52
@@ -42,7 +43,7 @@ void printCard(const Card *card) {
     const char *suits[4] = {"Coeurs", "Piques", "Carreaux", "Trefles"};
     const char *values[13] = {"Deux", "Trois", "Quatre", "Cinq", "Six", "Sept", "Huit", "Neuf", "Dix", "Valet", "Dame", "Roi", "As"};
     printf("%s de %s\n", values[card->value], suits[card->suit]);
-    printf("id = %d \n", card->id);
+    //printf("id = %d \n", card->id);
 }
 
 // fonction pour imprimer une main
@@ -134,49 +135,12 @@ void playerBet(Bets *playerBoard, const Stage stage )
     }
 }
 
-/*FinalPokerHand evaluateBestHand(Card *holeCards, Card *communityCards) {
-    PokerHand bestHand;
-    bestHand.ranking = HIGH_CARD; // La plus faible combinaison possible
-
-    Card possibleHand[7];
-
-    // Copier les deux cartes du joueur et les cinq cartes du board dans possibleHand
-    memcpy(possibleHand, holeCards, 2 * sizeof(Card));
-    memcpy(possibleHand + 2, communityCards, 5 * sizeof(Card));
-
-    // Trier possibleHand pour faciliter la vérification des combinaisons
-    qsort(possibleHand, 7, sizeof(Card), compareCards);
-
-    // Générer toutes les combinaisons de 5 cartes à partir des 7 cartes disponibles
-    // et trouver la meilleure combinaison.
-    Card tempHand[5];
-    for (int i = 0; i < 21; ++i) { // Il y a 21 combinaisons différentes pour choisir 5 cartes parmi 7
-        for (int j = 0, k = 0; j < 7; ++j) {
-            if (!(i & (1 << j))) { // Utiliser un masque pour inclure ou exclure chaque carte
-                tempHand[k++] = possibleHand[j];
-                if (k == 5) { // Quand nous avons sélectionné 5 cartes
-                    PokerHand currentHand;
-                    memcpy(currentHand.cards, tempHand, 5 * sizeof(Card));
-                    currentHand.ranking = evaluateHand(tempHand);
-                    if (currentHand.ranking > bestHand.ranking) {
-                        bestHand = currentHand;
-                    }
-                    break;
-                }
-            }
-        }
-    }
-    // bestHand contient maintenant la meilleure main de poker de 5 cartes du joueur
-    // bestHand.ranking est le classement de cette main
-    return bestHand;
-}*/
-
 float poker_game(float playerCredits)
 {
     float newStack = 0;
 
     Stage stage = PREFLOP;
-    
+
     Card deck[DECK_SIZE];
     PokerHand playerHand;
     PokerHand dealerHand;
@@ -234,29 +198,61 @@ float poker_game(float playerCredits)
         playerBet(&playerBoard, stage);
     
     printf("Les encheres sont cloturees, les cartes du dealer sont revelees\n");
+    printf("---------------------------MAIN DU DEALER------------------------\n");
     printHand(&dealerHand);
+    printf("---------------------------PLATEAU-------------------------------\n");
+    printBoard(board, 5);
+    printf("---------------------------VOTRE MAIN----------------------------\n");
+    printHand(&playerHand);
+    printf("-----------------------------------------------------------------\n");
 
-    printf("mise = %d , blinde = %d et play = %d \n",playerBoard.bet, playerBoard.blind, playerBoard.play);
-    printf("et la on evalue bisous\n");
+    //printf("mise = %d , blinde = %d et play = %d \n",playerBoard.bet, playerBoard.blind, playerBoard.play);
 
-    /*
-    printf("-----------------------------------------------------------------------------------------------------------------\n");
-    printf("Iddentifiant pour ROI de careau :\n");
-    printf("%d\n",makeCard(11, 'd'));
-    printf("Iddentifiant pour 2 de pique :\n");
-    printf("%d\n",makeCard(0, 's'));
-    printf("-----------------------------------------------------------------------------------------------------------------\n");
-    printf("Iddentifiant pour ROI de careau APRES :\n");
-    printf("%d\n",makeCard2(11, 'd'));
-    printf("Iddentifiant pour 2 de pique APRES :\n");
-    printf("%d\n",makeCard2(0, 's'));
-    printf("Iddentifiant pour 7 de trefle APRES :\n");
-    printf("%d\n",makeCard2(5, 'c'));
-    */
-    
+    Card playerSevenCardHand[7];
+    Card dealerSevenCardHand[7];
 
-    //il reste à developper un algo type Cactus Kev's
+    // On copie les deux cartes du joueur et les cinq cartes du board dans le tableau de sept cartes
+    memcpy(playerSevenCardHand, playerHand.cards, sizeof(Card) * 2);
+    memcpy(&playerSevenCardHand[2], board, sizeof(Card) * 5);
 
+    // On copie les deux cartes du dealer et les cinq cartes du board dans le tableau de sept cartes
+    memcpy(dealerSevenCardHand, dealerHand.cards, sizeof(Card) * 2);
+    memcpy(&dealerSevenCardHand[2], board, sizeof(Card) * 5);
+
+    // On evalue les mains du joueur et du dealer
+    unsigned short playerHandValue = eval_7hand(playerSevenCardHand);
+    unsigned short dealerHandValue = eval_7hand(dealerSevenCardHand);
+
+    // On obtient le classement des mains
+    int playerHandRank = hand_rank(playerHandValue);
+    int dealerHandRank = hand_rank(dealerHandValue);
+    printf("la valeur de votre main est de %d \n",playerHandValue);
+    printf("la valeur de la main du dealer est de %d \n",dealerHandValue);
+
+    printf("La main du joueur est evaluee à : %d\n", playerHandRank);
+    printf("La main du dealer est evaluee à : %d\n", dealerHandRank);
+
+    // Comparez les mains pour déterminer le gagnant
+    if (playerHandRank < dealerHandRank) {
+        printf("Le joueur gagne !\n");
+        newStack = playerCredits + playerBoard.bet; // ou une autre logique de paiement
+    } else if (playerHandRank > dealerHandRank) {
+        printf("Le dealer gagne !\n");
+        newStack = playerCredits - playerBoard.bet; // ou une autre logique de paiement
+    } else {
+        if (playerHandValue > dealerHandValue)
+        {
+            printf("le dealer gagne a la hauteur !\n");
+        }
+        else if (playerHandValue < dealerHandValue)
+        {
+            printf("le joueur gagne a la hauteur !\n");
+        }
+        else
+        {
+            printf("Le dealer et le joueur on la meme main !\n");
+        }
+    }
 
     return newStack;
 }

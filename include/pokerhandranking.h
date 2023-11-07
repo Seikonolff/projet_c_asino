@@ -1,22 +1,11 @@
 #ifndef POKERHANDRANKING_H
 #define POKERHANDRANKING_H
 
-typedef enum {
-    HIGH_CARD,
-    PAIR,
-    TWO_PAIR,
-    THREE_OF_A_KIND,
-    STRAIGHT,
-    FLUSH,
-    FULL_HOUSE,
-    FOUR_OF_A_KIND,
-    STRAIGHT_FLUSH,
-    ROYAL_FLUSH
-} HandRanking;
-
 int getCardIdentifier(int rank, int suit);
-//int makeCard(int rank, char suit);
-//int makeCard2(int rank, char suit);
-
+int hand_rank(unsigned short val);
+static unsigned find_fast(unsigned u);
+static unsigned short eval_5cards(const Card *c1, const Card *c2, const Card *c3, const Card *c4, const Card *c5);
+unsigned short eval_5hand(const Card *hand);
+unsigned short eval_7hand(const Card *hand);
 
 #endif // POKERHANDRANKING_H
