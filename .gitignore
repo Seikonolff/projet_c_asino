@@ -1,3 +1,6 @@
-bin/*
+bin/
 pokerhandranking.h
 pokerhandranking.c
+
+*.exe
+bin/casino_game.exe
