@@ -138,7 +138,7 @@ void blackjack_game() {
                     printf("Joueur %d gagne !\n", i + 1);
                     kdo = mise*2;
                     joueurstack += kdo;
-                    printf("Votre stack est maintenant de: %d\n",joueurstack);
+                    printf("Votre stack est maintenant de: %f\n",joueurstack);
                 } else if (totalCroupier > jeux[j]) {
                     printf("Le croupier gagne contre joueur %d.\n", i + 1);
                 } else {
@@ -186,7 +186,7 @@ void blackjack_game() {
                 printf("Joueur %d gagne !\n", i + 1);
                 kdo = mise*2;
                 joueurstack += kdo;
-                printf("Votre stack est maintenant de: %d\n",joueurstack);
+                printf("Votre stack est maintenant de: %f\n",joueurstack);
             } else if (totalCroupier > totalJoueurs[i]) {
                 printf("Le croupier gagne contre joueur %d.\n", i + 1);
             } else {
