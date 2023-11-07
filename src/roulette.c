@@ -288,8 +288,8 @@ void evaluateResult(int betType, int bet, int number, int color, int tier, int n
 
 }
 
-void roulette_game() {
-    int balance = 1000;
+float roulette_game(float credits) {
+    int balance = credits;
     int bet, betType;
     time_t start, end;
     float elapsed;
@@ -354,5 +354,6 @@ void roulette_game() {
     }
 
     printf("Merci d'avoir joue a la roulette!\n\n");
+    return balance;
 }
 
