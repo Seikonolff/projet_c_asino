@@ -1,3 +1,9 @@
+// Reste à faire 
+// -------> Interrupt pour chrono (RIEN NE VA PLUS).
+// -------> V1.4 : Jouer à la roulette française avec un seul joueur mais en pouvant faire plusieurs paris sur un même tirage.
+// -------> V1.5 :1.5 : Pouvoir jouer à la roulette française seul avec toutes les règles du jeu et afficher les tirages précédents s'il y en a.
+// -------> V2: Modelisation graphique.
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
