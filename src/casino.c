@@ -21,7 +21,6 @@ void initialize_casino()
 
 int lobby()
 {
-    float newStack = 0;
     printf("Selectionnez un jeu:\n1: Poker\n2: Blackjack\n3: Machine à sous\n4: Roulette\n5: Quitter\n");
 
         int choix;
@@ -30,25 +29,19 @@ int lobby()
         switch (choix) {
             case 1:
                 printf("Vous avez choisi Poker.\n");
-                //start_game(POKER);
-                newStack = poker_game(player.credits);
-                //**
-                // Pour que le joueur retrouve son stack dans sa partie de poker, il faudra passer le montant de son tapis à la fonction
-                // player.credits = poker_game(player.credits);
-                // La fonctionne retourne, à la fin de la partie, le montant du tapis mis à jour
-                //**
+                player.credits = poker_game(player.credits);
                 break;
             case 2:
                 printf("Vous avez choisi Blackjack.\n");
-                start_game(BLACKJACK);
+                blackjack_game();
                 break;
             case 3:
                 printf("Vous avez choisi Machine à sous.\n");
-                start_game(SLOTS);
+                slots_game();
                 break;
             case 4:
                 printf("Vous avez choisi Roulette");
-                start_game(ROULETTE);
+                roulette_game();
                 break;
             case 5:
                 printf("Merci d'avoir joué! Au revoir!\n");
@@ -59,35 +52,6 @@ int lobby()
                 break;
         }
     return 1;
-}
-
-void start_game(GameType game_type) // à voir si on garde cette fonction elle peut très bien merger dans le switch case du lobby
-{
-    switch (game_type)
-    {
-    case POKER :
-        //poker_game();
-        break;
-    
-    case BLACKJACK :
-        blackjack_game();
-        break;
-    
-    case SLOTS :
-        slots_game();
-        break;
-
-    case ROULETTE :
-        roulette_game();
-        break;
-    
-    default:
-        break;
-    }
-}
-
-void update_player_credits(int amount) {
-    player.credits += amount;
 }
 
 void shutdown_casino() {
