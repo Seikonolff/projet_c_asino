@@ -43,30 +43,36 @@ char* affichage_item(int rouleau)
             case 0: {item0="BELL";return item0;}
             case 1: {item0="BAR";return item0;}
             case 2: {item0="CHERRIES";return item0;}
-            default: {item0="7";return item0;}
+            case 3: {item0="7";return item0;}
+            default: {item0="ERREUR";return item0;}
         }
 }
 
 int check_results() 
 {
+    for (int j=0; j<3; j++){
+        if (affichage_item(j) == "ERREUR") //strcmp renvoie 0 si les deux chaines sont identiques
+            {return 0;}
+        }
     if (rouleaux[0].item == rouleaux[1].item && rouleaux[1].item == rouleaux[2].item)
-        {return 2;}
+    {return 3;}
 
     if (rouleaux[0].item == rouleaux[1].item || rouleaux[1].item == rouleaux[2].item || rouleaux[2].item == rouleaux[0].item)
-    {return 1;}
+    {return 2;}
 
     if (rouleaux[0].item != rouleaux[1].item && rouleaux[1].item != rouleaux[2].item && rouleaux[2].item != rouleaux[0].item)
-    {return 0;}
+    {return 1;}
     return 0; //no gair nor loss
 }
 
 float gain(float mise, int resultat){
     switch (resultat)
     {
-    case 0 : return 0; break;
-    case 1 : return 1.5*mise; break;
-    case 2 : return 10*mise; break;
-    default: return 0; break;
+    case 0 : return mise; break; //cas d'une erreur lors du tirage
+    case 1 : return 0; break;    //défaire du joueur
+    case 2 : return 1.5*mise; break; //half house soit 2 item identiques
+    case 3 : return 10*mise; break; //trois items identiques
+    default: return mise; break;   //par défaut, erreur machine donc le joueur perd rien
     }
 }
 
@@ -113,15 +119,13 @@ float slots_game(float stack)
 
         profit = gain(playerbet, check_results());
         stack += profit;
-        if (check_results()==2){
-            printf("JACKPOT!!!!!\n");
-        }
-        if (profit !=0){
-            printf("Bravo ! Vous avez gagné %f $ \n", profit);
-        }
-        else{
-            printf("GAME OVER\n");
-            printf("T'as perdu sale chien hahaha \n");
+        switch (check_results())
+        {
+        case 0 : printf("Desole, erreur dans le tirage, vous n'avez rien perdu.\n");break;
+        case 1 : printf("Vous avez perdu...\n");break;
+        case 2 : printf("Bravo ! Vous avez gagné %f $ \n", profit);break;
+        case 3 : printf("JACKPOT!!!!!\nVous avez gagné %f $\n", profit);break;
+        default: break;
         }
         printf("Votre nouveau stack est %f $ \n", stack);
         printf("Voulez vous continuer à jouer ? (o/n)\n");
