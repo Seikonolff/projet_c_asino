@@ -47,10 +47,10 @@ int lobby()
             case 5:
                 printf("Vous avez choisi la banque.\nVeuillez saisir le montant du depot.\n");
                 float depot;
-                scanf("%f",depot);
+                scanf("%f", &depot);
                 while(depot <= 0){
                     printf("Veuillez saisir un montal valide");
-                    scanf("%f", depot);
+                    scanf("%f", &depot);
                 }
                 player.credits += depot;
                 break;
