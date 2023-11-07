@@ -1,5 +1,5 @@
 #include "poker.h"
-//#include "pokerhandranking.h"
+#include "pokerhandranking.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -32,11 +32,8 @@ void dealBoard(Card *deck, Card *board, int numCards) {
     }
 }
 
-// fonction pour évaluer une main - très simplifiée
+
 int evaluateHand(PokerHand *hand) {
-    // Ici, vous évaluerez la main selon les règles du poker et retournerez un score ou une évaluation.
-    // Cette fonction nécessitera une logique complexe pour évaluer correctement toutes les combinaisons de poker.
-    // Pour l'instant, nous retournons un placeholder.
     return 0; // placeholder
 }
 
@@ -45,6 +42,7 @@ void printCard(const Card *card) {
     const char *suits[4] = {"Coeurs", "Piques", "Carreaux", "Trefles"};
     const char *values[13] = {"Deux", "Trois", "Quatre", "Cinq", "Six", "Sept", "Huit", "Neuf", "Dix", "Valet", "Dame", "Roi", "As"};
     printf("%s de %s\n", values[card->value], suits[card->suit]);
+    printf("id = %d \n", card->id);
 }
 
 // fonction pour imprimer une main
@@ -183,11 +181,13 @@ void poker_game()
 
     Bets playerBoard;
 
-    // initialiser le paquet (ceci est une simplification)
+    // initialiser le paquet
     for(int i = 0; i < 4; i++) { // pour chaque couleur
         for(int j = 0; j < 13; j++) { // pour chaque rang
             deck[i * 13 + j].suit = i;
             deck[i * 13 + j].value = j;
+            deck[i * 13 + j].id = getCardIdentifier(j , i);
+            //printCard(&deck[i * 13 + j]);
         }
     }
 
@@ -235,6 +235,22 @@ void poker_game()
 
     printf("mise = %d , blinde = %d et play = %d \n",playerBoard.bet, playerBoard.blind, playerBoard.play);
     printf("et la on evalue bisous\n");
+
+    /*
+    printf("-----------------------------------------------------------------------------------------------------------------\n");
+    printf("Iddentifiant pour ROI de careau :\n");
+    printf("%d\n",makeCard(11, 'd'));
+    printf("Iddentifiant pour 2 de pique :\n");
+    printf("%d\n",makeCard(0, 's'));
+    printf("-----------------------------------------------------------------------------------------------------------------\n");
+    printf("Iddentifiant pour ROI de careau APRES :\n");
+    printf("%d\n",makeCard2(11, 'd'));
+    printf("Iddentifiant pour 2 de pique APRES :\n");
+    printf("%d\n",makeCard2(0, 's'));
+    printf("Iddentifiant pour 7 de trefle APRES :\n");
+    printf("%d\n",makeCard2(5, 'c'));
+    */
+    
 
     //il reste à developper un algo type Cactus Kev's
 

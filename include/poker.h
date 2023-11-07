@@ -10,6 +10,7 @@ typedef enum {
 typedef struct {
     int value; // value of the card, e.g., 2 for Two, 11 for Jack, etc.
     int suit;  // suit of the card, e.g., 0 for Hearts, 1 for Spades, etc.
+    int id;
 } Card;
 
 typedef struct {
