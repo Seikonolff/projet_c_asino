@@ -10,7 +10,7 @@ typedef enum {
 
 typedef struct {
     //str name;
-    int credits;
+    float credits;
 } Player;
 
 void initialize_casino();

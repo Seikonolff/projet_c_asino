@@ -4,6 +4,7 @@
 int main() {
 
     int gameRunning = 1;
+    initialize_casino();
     while (gameRunning)
         gameRunning = lobby();
         

@@ -10,13 +10,18 @@ Player player;
 
 void initialize_casino()
 {
+    printf("Bienvenue au Casino !\n");
+    printf("Veuillez entrer votre credit\n");
+    scanf("%f",&player.credits);
+    //printf("%f\n",player.credits);
     //player.name += "";
-    int credits = 1000;
+
+    return;
 }
 
 int lobby()
 {
-    printf("Bienvenue au Casino!\n");
+    float newStack = 0;
     printf("Selectionnez un jeu:\n1: Poker\n2: Blackjack\n3: Machine à sous\n4: Roulette\n5: Quitter\n");
 
         int choix;
@@ -25,7 +30,8 @@ int lobby()
         switch (choix) {
             case 1:
                 printf("Vous avez choisi Poker.\n");
-                start_game(POKER);
+                //start_game(POKER);
+                newStack = poker_game(player.credits);
                 //**
                 // Pour que le joueur retrouve son stack dans sa partie de poker, il faudra passer le montant de son tapis à la fonction
                 // player.credits = poker_game(player.credits);
@@ -60,7 +66,7 @@ void start_game(GameType game_type) // à voir si on garde cette fonction elle p
     switch (game_type)
     {
     case POKER :
-        poker_game();
+        //poker_game();
         break;
     
     case BLACKJACK :
