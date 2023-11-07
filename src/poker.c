@@ -171,8 +171,10 @@ void playerBet(Bets *playerBoard, const Stage stage )
     return bestHand;
 }*/
 
-void poker_game()
+float poker_game(float playerCredits)
 {
+    float newStack = 0;
+
     Stage stage = PREFLOP;
     Card deck[DECK_SIZE];
     PokerHand playerHand;
@@ -255,5 +257,5 @@ void poker_game()
     //il reste à developper un algo type Cactus Kev's
 
 
-    return;
+    return newStack;
 }
