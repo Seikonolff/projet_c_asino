@@ -41,10 +41,10 @@ int lobby()
                 break;
             case 4:
                 printf("Vous avez choisi Roulette");
-                roulette_game();
+                player.credits = roulette_game(player.credits);
                 break;
             case 5:
-                printf("Merci d'avoir joué! Au revoir!\n");
+                printf("Merci d'avoir joue! Au revoir!\n");
                 return 0;
                 break;
             default:
