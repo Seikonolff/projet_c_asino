@@ -21,7 +21,8 @@ void initialize_casino()
 
 int lobby()
 {
-    printf("Selectionnez un jeu:\n1: Poker\n2: Blackjack\n3: Machine à sous\n4: Roulette\n5: Quitter\n");
+    printf("Vous avez %f $.\n", player.credits);
+    printf("Selectionnez un jeu:\n1: Poker\n2: Blackjack\n3: Machine à sous\n4: Roulette\n5: Aller a la banque\n6: Quitter\n");
 
         int choix;
         scanf("%d", &choix);
@@ -37,18 +38,28 @@ int lobby()
                 break;
             case 3:
                 printf("Vous avez choisi Machine à sous.\n");
-                slots_game();
+                player.credits = slots_game(player.credits);
                 break;
             case 4:
                 printf("Vous avez choisi Roulette");
-                roulette_game();
+                //roulette_game();
                 break;
             case 5:
+                printf("Vous avez choisi la banque.\nVeuillez saisir le montant du depot.\n");
+                float depot;
+                scanf("%f",depot);
+                while(depot <= 0){
+                    printf("Veuillez saisir un montal valide");
+                    scanf("%f", depot);
+                }
+                player.credits += depot;
+                break;
+            case 6:
                 printf("Merci d'avoir joué! Au revoir!\n");
                 return 0;
                 break;
             default:
-                printf("Sélection non valide. Veuillez choisir entre 1 et 4.\n");
+                printf("Sélection non valide. Veuillez choisir entre 1 et 6.\n");
                 break;
         }
     return 1;
