@@ -356,9 +356,6 @@ float roulette_game(float credits) {
             case 10:
                 twoLinesChoice = getTwoLines();
             break;
-            case 11:
-            case 12;
-
 
         }
 
