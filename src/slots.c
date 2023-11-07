@@ -13,9 +13,8 @@
 slot rouleaux[nombre_rouleaux]; //définition d'un tableau rouleaux de 3 structures slot
 
 char* item0; //définition de l'item du rouleau X
-int stack = initial_stack;
-int playerbet;
-int profit;
+//float stack = initial_stack;
+
 
 void init_rouleaux()
 {
@@ -61,7 +60,7 @@ int check_results()
     return 0; //no gair nor loss
 }
 
-int gain(int mise, int resultat){
+float gain(float mise, int resultat){
     switch (resultat)
     {
     case 0 : return 0; break;
@@ -71,65 +70,79 @@ int gain(int mise, int resultat){
     }
 }
 
-void slots_game()
+float slots_game(float stack)
 {
     char reponse[10];
-    printf("Début du jeu de la machine à sous ! \n Vous avez %d $ \n", stack);
+    float playerbet;
+    int playerbet_int;
+    float profit;
+    printf("Début du jeu de la machine à sous ! \n Vous avez %f $ \n", stack);
     //printf("Tapez 0 pour retourner au lobby, 1 pour jouer à la machine à sous.\n");
+
     while (true){
-    printf("Combien voulez vous misez ?\n");
-    scanf("%d", &playerbet);
-    while (playerbet > stack){
-        printf("Pas assez d'argent pour miser %d $, votre mise max est de %d $ \n", playerbet, stack);
-        printf("Combien voulez vous misez ?\n");
-        scanf("%d", &playerbet);
-    }
-    printf("Votre mise est de %d $ \n", playerbet);
-    stack -= playerbet;
-    init_rouleaux();
-    init_aleatoire();
+        printf("Combien voulez vous miser ?\n");
+        scanf("%f", &playerbet);
+        while (playerbet > stack){
+            printf("Pas assez d'argent pour miser %f $, votre mise max est de %f $ \n", playerbet, stack);
+            printf("Combien voulez vous miser ?\n");
+            scanf("%f", &playerbet);
+        }
+        while (playerbet < 10){
+            printf("La mise minimale est de 10$.\n");
+            printf("Combien voulez vous miser ?\n");
+            scanf("%f", &playerbet);
+        }
+        playerbet_int = (int)playerbet;
+        while (playerbet != playerbet_int){
+            printf("Le jeton le plus petit est 1$, vous ne pouvez pas miser des centimes.\nCombien voulez vous miser ?\n");
+            scanf("%f", playerbet);
+        }
+        printf("Votre mise est de %f $ \n", playerbet);
+        stack -= playerbet;
+        init_rouleaux();
+        init_aleatoire();
 
-    for (int j=0; j<5; j++){
-    for (int i = 0; i< nombre_rouleaux; i++)
-    {
-        rouleaux[i].item = tirage_slot();
-    }
-    printf("%-20s |%-20s |%-20s |\n",affichage_item(0), affichage_item(1), affichage_item(2));
-    sleep(0.1);
-    }
+        for (int j=0; j<5; j++){
+        for (int i = 0; i< nombre_rouleaux; i++)
+        {
+            rouleaux[i].item = tirage_slot();
+        }
+        printf("%-20s |%-20s |%-20s |\n",affichage_item(0), affichage_item(1), affichage_item(2));
+        sleep(0.1);
+        }
 
-    profit = gain(playerbet, check_results());
-    stack += profit;
-    if (check_results()==2){
-        printf("JACKPOT!!!!!\n");
-    }
-    if (profit !=0){
-        printf("Bravo ! Vous avez gagné %d $ \n", profit);
-    }
-    else{
-        printf("GAME OVER\n");
-        printf("T'as perdu sale chien hahaha \n");
-    }
-    printf("Votre nouveau stack est %d $ \n", stack);
-    printf("Voulez vous continuer à jouer ? (o/n)\n");
-    scanf("%s",reponse);
+        profit = gain(playerbet, check_results());
+        stack += profit;
+        if (check_results()==2){
+            printf("JACKPOT!!!!!\n");
+        }
+        if (profit !=0){
+            printf("Bravo ! Vous avez gagné %f $ \n", profit);
+        }
+        else{
+            printf("GAME OVER\n");
+            printf("T'as perdu sale chien hahaha \n");
+        }
+        printf("Votre nouveau stack est %f $ \n", stack);
+        printf("Voulez vous continuer à jouer ? (o/n)\n");
+        scanf("%s",reponse);
 
-    if(reponse[0]=='o'||reponse[0]=='O')//on regarde le premier cara de la chaine
-		{
-		if(stack==0){
-            printf("T'as plus d'argent, tu peux plus jouer!!\n");
-            break;
+        if(reponse[0]=='o'||reponse[0]=='O')//on regarde le premier cara de la chaine
+            {
+            if(stack<10){
+                printf("Retournez a la banque pour deposer des $$$!!\n");
+                return stack; break;
+                }
             }
-        }//on continue dans la boucle de jeu
-    else {break;}
-    /*
-    if(reponse[0]=='n' || reponse[0]=='N'){
-        break;
-    }
-    else 
-		{
-        printf("Nous n'avons pas compris, merci de répondre par oui ou non \n");
-		}
-    */
+        else { return stack; break;} //on continue dans la boucle de jeu
+        /*
+        if(reponse[0]=='n' || reponse[0]=='N'){
+            break;
+        }
+        else 
+            {
+            printf("Nous n'avons pas compris, merci de répondre par oui ou non \n");
+            }
+        */
     } 
 }  
