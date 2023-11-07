@@ -67,7 +67,7 @@ int gain(int mise, int resultat){
     case 0 : return 0; break;
     case 1 : return 1.5*mise; break;
     case 2 : return 10*mise; break;
-    default: break;
+    default: return 0; break;
     }
 }
 
