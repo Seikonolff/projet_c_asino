@@ -59,7 +59,6 @@ int getBetType() {
     return betType;
 }
 
-
 int getSpecificNumber() {
     int number;
     do {
@@ -122,14 +121,12 @@ bool areAdjacent(int num1, int num2) {
             }
         }
     }
-
     if ((i1 == i2 && abs(j1 - j2) == 1) || (j1 == j2 && abs(i1 - i2) == 1)) {
         return true;
     }
     if (abs(i1 - i2) == 1 && abs(j1 - j2) == 1) {
         return true;
     }
-
     return false;
 }
 
@@ -147,13 +144,10 @@ void getCarreNumbers(int *num1, int *num2, int *num3, int *num4) {
     do {
         printf("Entrez le premier numero (bas gauche) du carre (1-32) : ");
         scanf("%d", num1);
-        
-        // Vérifie si num1 est dans la dernière colonne (les numéros 3, 6, 9, ..., 36)
+
         bool isLastColumn = (*num1 % 3 == 0);
-        // Vérifie si num1 est dans les deux dernières lignes (les numéros 31-36)
         bool isLastRow = *num1 > 32;
 
-        // Le carré est valide si num1 n'est pas dans la dernière colonne et pas dans les deux dernières lignes
         isValidSquare = !isLastColumn && !isLastRow;
         
         if (!isValidSquare) {
@@ -213,81 +207,72 @@ int getTwoLines() {
     return line;
 }
 
-
-
 void evaluateResult(int betType, int bet, int number, int color, int tier, int numCheval1, int numCheval2, int carreNum1, int carreNum2, int carreNum3, int carreNum4, int column, int columnsChoice, int lineChoice, int twoLinesChoice, int winningNumber, int *balance) {
     int win = 0;
 
     switch (betType) {
         case 1:
-            if (winningNumber == number) {
-                win = bet * 36;
-            }
+            if (winningNumber == number) 
+                {win = bet * 36;}
             break;
+
         case 2:
         case 3:
-            if (color == getNumberColor(winningNumber)) {
-                win = bet * 2;
-            }
+            if (color == getNumberColor(winningNumber)) 
+                {win = bet * 2;}
             break;
+
         case 4:
             if ((tier == 1 && winningNumber >= 1 && winningNumber <= 12) ||
                 (tier == 2 && winningNumber >= 13 && winningNumber <= 24) ||
-                (tier == 3 && winningNumber >= 25 && winningNumber <= 36)) {
-                win = bet * 3;
-            }
-            break;
-        case 5:
-            if (winningNumber == numCheval1 || winningNumber == numCheval2) {
-                win = bet * 18;
-            }
-            break;
-        case 6:
-            if (winningNumber == carreNum1 || winningNumber == carreNum2 || winningNumber == carreNum3 || winningNumber == carreNum4) {
-                win = bet * 9;
-            }
+                (tier == 3 && winningNumber >= 25 && winningNumber <= 36)) 
+                {win = bet * 3;}
             break;
 
+        case 5:
+            if (winningNumber == numCheval1 || winningNumber == numCheval2) 
+                {win = bet * 18;}
+            break;
+
+        case 6:
+            if (winningNumber == carreNum1 || winningNumber == carreNum2 || winningNumber == carreNum3 || winningNumber == carreNum4) 
+                {win = bet * 9;}
+            break;
 
         case 7: 
             if ((column == 1 && winningNumber % 3 == 1) ||
                 (column == 2 && winningNumber % 3 == 2) ||
-                (column == 3 && winningNumber % 3 == 0 && winningNumber != 0)) {
-                win = bet * 3;
-            }
+                (column == 3 && winningNumber % 3 == 0 && winningNumber != 0)) 
+                {win = bet * 3;}
             break;
 
         case 8: 
             if ((columnsChoice == 1 && (winningNumber % 3 == 1 || winningNumber % 3 == 2)) ||
-                (columnsChoice == 2 && (winningNumber % 3 == 2 || (winningNumber % 3 == 0 && winningNumber != 0)))) {
-                win = bet * 2; 
-            }
+                (columnsChoice == 2 && (winningNumber % 3 == 2 || (winningNumber % 3 == 0 && winningNumber != 0)))) 
+                {win = bet * 2;}
             break;
 
         case 9: 
             int firstNumInLine = (lineChoice - 1) * 3 + 1;
-            if (winningNumber >= firstNumInLine && winningNumber < firstNumInLine + 3) {
-                win = bet * 11;
-            }
+            if (winningNumber >= firstNumInLine && winningNumber < firstNumInLine + 3) 
+                {win = bet * 11;}
             break;
 
         case 10: 
             int firstNumInTwoLines = (twoLinesChoice - 1) * 3 + 1;
             int lastNumInTwoLines = firstNumInTwoLines + 5; 
-            if (winningNumber >= firstNumInTwoLines && winningNumber <= lastNumInTwoLines) {
-                win = bet * 5; 
-            }
+            if (winningNumber >= firstNumInTwoLines && winningNumber <= lastNumInTwoLines) 
+                {win = bet * 5;}
             break;
+
         case 11:
-            if (winningNumber >= 19 && winningNumber <= 36) {
-            win = bet * 2;
-            }
+            if (winningNumber >= 19 && winningNumber <= 36) 
+                {win = bet * 2;}
             break;
 
         case 12:
-            if (winningNumber >= 1 && winningNumber <= 18) {
-            win = bet * 2;
-            }
+            if (winningNumber >= 1 && winningNumber <= 18) 
+                {win = bet * 2;}
             break;
     }
 
