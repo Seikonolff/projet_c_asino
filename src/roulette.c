@@ -29,6 +29,7 @@ void RouletteTable() {
 int userbet(int balance) {
     int bet;
     do {
+        printf("\n\n FAITES VOS JEUX! \n\n");
         RouletteTable();
         printf("Placez votre mise (0 pour quitter) : ");
         
@@ -83,6 +84,7 @@ int getTier() {
 
 int getWinningNumber() {
     int winningNumber = rand() % 37;
+    printf("\n\n RIEN NE VA PLUS! \n\n");
     printf("La roulette tourne... Le numero gagnant est : %d\n", winningNumber);
     return winningNumber;
 }
@@ -288,14 +290,29 @@ void evaluateResult(int betType, int bet, int number, int color, int tier, int n
 
 void roulette_game() {
     int balance = 1000;
+    int bet, betType;
+    time_t start, end;
+    float elapsed;
     srand((unsigned int)time(NULL));
     printf("\n Bienvenue a la roulette! Vous avez %d pieces.\n", balance);
 
-    while (balance > 0) {
-        int bet = userbet(balance);
-        if (bet == 0) break;
 
-        int betType = getBetType();
+    while (balance > 0) {
+        
+        bet = userbet(balance); // On suppose que userbet ne bloque pas et retourne immédiatement
+
+        if (bet == 0) {
+            break; // Sortie du jeu
+        }
+        start = time(NULL); // Commence le compte à rebours
+        betType = getBetType(); // Demandez le type de pari après la mise
+        end = time(NULL);
+        elapsed += difftime(end, start);
+        if (elapsed >= 30.0) {
+            printf("\n\n RIEN NE VA PLUS! \n\n");
+            printf("Temps ecoule pour choisir le type de pari! Retour au menu.\n");
+            break; // Retour menu
+        }
         int number = 0, color = 0, tier = 0, numCheval1 = 0, numCheval2 = 0, carreNum1 = 0, carreNum2 = 0, carreNum3 = 0, carreNum4 = 0; 
         int column = 0, twoColumnsChoice = 0, lineChoice = 0, twoLinesChoice = 0;
 
@@ -333,8 +350,9 @@ void roulette_game() {
         int winningNumber = getWinningNumber();
             evaluateResult(betType, bet, number, color, tier, numCheval1, numCheval2, carreNum1, carreNum2, carreNum3, carreNum4, column, twoColumnsChoice, lineChoice, twoLinesChoice, winningNumber, &balance);
             printf("Votre solde est maintenant de %d pieces.\n", balance);
+            elapsed = 0;
     }
 
-    printf("Merci d'avoir joue a la roulette!");
+    printf("Merci d'avoir joue a la roulette!\n\n");
 }
 
