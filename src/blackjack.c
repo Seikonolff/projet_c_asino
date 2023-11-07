@@ -20,7 +20,7 @@ void blackjack_game() {
     int totalJoueurs[MAX_JOUEURS] = {0};
     int totalCroupier = 0;
     int nombreJoueurs;
-    int joueurstack = 1000;
+    float joueurstack = 1000;
     int kdo;
     int mise;
 
@@ -35,15 +35,19 @@ void blackjack_game() {
     scanf("%d", &mise);
 
     int cartesJoueurs[MAX_JOUEURS][2] = {0};  // Tableau pour stocker les cartes des joueurs.
-    int *pointeur1;
-    int *pointeur2;
+
     // Distribution des cartes initiales pour chaque joueur et le croupier.
     for (int i = 0; i < nombreJoueurs; i++) {
         cartesJoueurs[i][0] = tirerCarte();
         cartesJoueurs[i][1] = tirerCarte();
-        pointeur1 = &cartesJoueurs[i][0];
-        pointeur2 = &cartesJoueurs[i][1];
         totalJoueurs[i] = cartesJoueurs[i][0] + cartesJoueurs[i][1];
+        if (totalJoueurs[i] == 21)
+        {
+            printf("Bravo joueur %d vous avez un BlackJack !\n", i+1);
+            joueurstack += mise*2.5;
+            printf("Votre nouveau stack est: %f\n",joueurstack);
+            break;
+        }
     }
 
     totalCroupier += tirerCarte();
@@ -82,7 +86,8 @@ void blackjack_game() {
 
                 printf("Votre premier jeu est : %d\n", jeu1);
                 printf("Votre deuxième jeu est : %d\n", jeu2);
-
+                
+                //Blackjack avec deux jeux
                 while (jeu1 < 21) {
                     char choix;
                     printf("Joueur %d, voulez-vous tirer une carte de plus pour votre main 1 ? (o/n) : ", i + 1);
@@ -113,42 +118,86 @@ void blackjack_game() {
                 }
                 
         
-        printf("Main du croupier : %d\n\n", totalCroupier);
-    
-        // Tour du croupier.
-        while (totalCroupier < 17) {
-            int nouvelleCarte = tirerCarte();
-            printf("Le croupier a tiré : %d\n", nouvelleCarte);
-            totalCroupier += nouvelleCarte;
-            printf("Main du croupier : %d\n", totalCroupier);
-        }
+                printf("Main du croupier : %d\n\n", totalCroupier);
+            
+                // Tour du croupier.
+                while (totalCroupier < 17) {
+                    int nouvelleCarte = tirerCarte();
+                    printf("Le croupier a tiré : %d\n", nouvelleCarte);
+                    totalCroupier += nouvelleCarte;
+                    printf("Main du croupier : %d\n", totalCroupier);
+                }
 
-    // Détermination des gagnants.
-        int jeux[2] = {jeu1,jeu2};
+            // Détermination des gagnants.
+                int jeux[2] = {jeu1,jeu2};
 
-        for (int j = 0; j < 2; j++){
-        if (jeux[j] > 21) {
-            printf("Joueur %d votre main %d a dépassé 21. Le croupier gagne.\n", i + 1, j + 1);
-        } else if (totalCroupier > 21 || jeux[j] > totalCroupier) {
-            printf("Joueur %d gagne !\n", i + 1);
-            kdo = mise*2;
-            joueurstack += kdo;
-            printf("Votre stack est maintenant de: %d\n",joueurstack);
-        } else if (totalCroupier > jeux[j]) {
-            printf("Le croupier gagne contre joueur %d.\n", i + 1);
-        } else {
-            printf("Égalité entre joueur %d et le croupier !\n", i + 1);
+                for (int j = 0; j < 2; j++){
+                if (jeux[j] > 21) {
+                    printf("Joueur %d votre main %d a dépassé 21. Le croupier gagne.\n", i + 1, j + 1);
+                } else if (totalCroupier > 21 || jeux[j] > totalCroupier) {
+                    printf("Joueur %d gagne !\n", i + 1);
+                    kdo = mise*2;
+                    joueurstack += kdo;
+                    printf("Votre stack est maintenant de: %d\n",joueurstack);
+                } else if (totalCroupier > jeux[j]) {
+                    printf("Le croupier gagne contre joueur %d.\n", i + 1);
+                } else {
+                    printf("Égalité entre joueur %d et le croupier !\n", i + 1);
+                }
+                }
+                }
+            else {  //Cas carte identiques mais ne souhaite pas split
+                while (totalJoueurs[i] < 21) {
+                char choix;
+                printf("Joueur %d, voulez-vous tirer une carte de plus ou doublé ? (o/n/d) : ", i + 1);
+                scanf(" %c", &choix);
+
+                if (choix == 'o') {
+                    int nouvelleCarte = tirerCarte();
+                    printf("Joueur %d, vous avez tiré : %d\n", i + 1, nouvelleCarte);
+                    totalJoueurs[i] += nouvelleCarte;
+                    printf("Main du joueur %d : %d\n", i + 1, totalJoueurs[i]);
+                } else if (choix == 'd'){
+                int nouvelleCarte = tirerCarte();
+                printf("Joueur %d, vous avez tiré : %d\n", i + 1, nouvelleCarte);
+                totalJoueurs[i] += nouvelleCarte;
+                printf("Main du joueur %d : %d\n", i + 1, totalJoueurs[i]);
+                break;
+                }
+                else {
+                    break;
+                }
+            }
+            printf("Main du croupier : %d\n\n", totalCroupier);
+        
+            // Tour du croupier.
+            while (totalCroupier < 17) {
+                int nouvelleCarte = tirerCarte();
+                printf("Le croupier a tiré : %d\n", nouvelleCarte);
+                totalCroupier += nouvelleCarte;
+                printf("Main du croupier : %d\n", totalCroupier);
+            }
+
+        // Détermination des gagnants.
+
+            if (totalJoueurs[i] > 21) {
+                printf("Joueur %d a dépassé 21. Le croupier gagne.\n", i + 1);
+            } else if (totalCroupier > 21 || totalJoueurs[i] > totalCroupier) {
+                printf("Joueur %d gagne !\n", i + 1);
+                kdo = mise*2;
+                joueurstack += kdo;
+                printf("Votre stack est maintenant de: %d\n",joueurstack);
+            } else if (totalCroupier > totalJoueurs[i]) {
+                printf("Le croupier gagne contre joueur %d.\n", i + 1);
+            } else {
+                printf("Égalité entre joueur %d et le croupier !\n", i + 1);
+            };
         }
         }
-        }
-        else {
-            break;
-        }
-        }
-        else {
+        else { //Cas classique du blackjack
         while (totalJoueurs[i] < 21) {
             char choix;
-            printf("Joueur %d, voulez-vous tirer une carte de plus ? (o/n) : ", i + 1);
+            printf("Joueur %d, voulez-vous tirer une carte de plus ou doubler ? (o/n/d) : ", i + 1);
             scanf(" %c", &choix);
 
             if (choix == 'o') {
@@ -156,7 +205,14 @@ void blackjack_game() {
                 printf("Joueur %d, vous avez tiré : %d\n", i + 1, nouvelleCarte);
                 totalJoueurs[i] += nouvelleCarte;
                 printf("Main du joueur %d : %d\n", i + 1, totalJoueurs[i]);
-            } else {
+            } else if (choix == 'd'){
+                int nouvelleCarte = tirerCarte();
+                printf("Joueur %d, vous avez tiré : %d\n", i + 1, nouvelleCarte);
+                totalJoueurs[i] += nouvelleCarte;
+                printf("Main du joueur %d : %d\n", i + 1, totalJoueurs[i]);
+                break;
+            }
+            else {
                 break;
             }
         }
@@ -178,7 +234,7 @@ void blackjack_game() {
             printf("Joueur %d gagne !\n", i + 1);
             kdo = mise*2;
             joueurstack += kdo;
-            printf("Votre stack est maintenant de: %d\n",joueurstack);
+            printf("Votre stack est maintenant de: %f\n",joueurstack);
         } else if (totalCroupier > totalJoueurs[i]) {
             printf("Le croupier gagne contre joueur %d.\n", i + 1);
         } else {
