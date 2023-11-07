@@ -176,6 +176,7 @@ float poker_game(float playerCredits)
     float newStack = 0;
 
     Stage stage = PREFLOP;
+    
     Card deck[DECK_SIZE];
     PokerHand playerHand;
     PokerHand dealerHand;
