@@ -25,7 +25,9 @@ void initialize_casino()
 
 int lobby()
 {
-    printf("Vous avez %2.f $.\n", player.credits);
+    clear_terminal();
+    affichage_stack(player.credits);
+    printf("Vous avez %.22.f $.\n", player.credits);
     printf("Veuillez sélectionner un jeu :\n1: Poker\n2: Blackjack\n3: Machine à sous\n4: Roulette\n5: Aller a la banque\n6: Quitter\n");
 
         int choix;
@@ -49,6 +51,8 @@ int lobby()
                 player.credits = roulette_game(player.credits);
                 break;
             case 5:
+                clear_terminal();
+                affichage_stack(player.credits);
                 printf("Vous avez choisi la banque.\n Veuillez saisir le montant du depot.\n");
                 float depot;
                 scanf("%f", &depot);
