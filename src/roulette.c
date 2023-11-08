@@ -1,5 +1,4 @@
 // Reste à faire 
-// -------> Interrupt pour chrono (RIEN NE VA PLUS).
 // -------> V1.4 : Jouer à la roulette française avec un seul joueur mais en pouvant faire plusieurs paris sur un même tirage.
 // -------> V1.5 :1.5 : Pouvoir jouer à la roulette française seul avec toutes les règles du jeu et afficher les tirages précédents s'il y en a.
 // -------> V2: Modelisation graphique.
@@ -18,6 +17,9 @@
 #define TWO_LINES 10
 #define PASSE 11
 #define MANQUE 12
+#define PAIR 13
+#define IMPAIR 14
+
 
 void RouletteTable() {
     printf("     +------+------+------+------+------+------+------+------+------+------+------+------+--------+\n");
@@ -31,6 +33,16 @@ void RouletteTable() {
     printf("+----+------+------+------+------+------+------+------+------+------+------+------+------+  TIER  |\n");
     printf("     |      PASSE (19 a 36)      |           PAIR            |            NOIR(n)        |   3    |\n");
     printf("     +------+------+------+------+------+------+------+------+------+------+------+------+--------+\n");
+}
+
+void RouletteIntroTexte(){
+    printf("######                                                        #####\n");
+    printf("#     #  ####  #    # #      ###### ##### ##### ######       #     #   ##   #    # ######\n");
+    printf("#     # #    # #    # #      #        #     #   #            #        #  #  ##  ## #\n");
+    printf("######  #    # #    # #      #####    #     #   #####        #  #### #    # # ## # #####\n");
+    printf("#   #   #    # #    # #      #        #     #   #            #     # ###### #    # #\n");
+    printf("#    #  #    # #    # #      #        #     #   #            #     # #    # #    # #\n");
+    printf("#     #  ####   ####  ###### ######   #     #   ######        #####  #    # #    # ######\n");
 }
 
 void clear_input_buffer() {
@@ -64,8 +76,8 @@ int getBetType() {
     do {
         printf("Choisissez un type de mise :\n");
         printf("1.  Chiffre specifique\n");
-        printf("2.  Rouge\n");
-        printf("3.  Noir\n");
+        printf("2.  Rouge \n");
+        printf("3.  Noir \n");
         printf("4.  Tiers (1-12, 13-24, 25-36)\n");
         printf("5.  Cheval (deux numeros adjacents)\n");
         printf("6.  Carre (quatre numeros en carre)\n");
@@ -75,13 +87,15 @@ int getBetType() {
         printf("10. Deux lignes adjacentes (par exemple 1,2,3 et 4,5,6)\n");
         printf("11. Passe (19 a 36)\n");
         printf("12. Manque (1 a 18)\n");
+        printf("13. Pair\n");
+        printf("14. Impair\n");
     valid_input = scanf("%d", &betType);
-        if (!valid_input || betType < 1 || betType > 12) {
-            printf("Entree invalide. Veuillez entrer un nombre entre 1 et 12.\n");
+        if (!valid_input || betType < 1 || betType > 14) {
+            printf("Entree invalide. Veuillez entrer un nombre entre 1 et 14.\n");
             clear_input_buffer();
             betType = -1; // Pour continuer la boucle
         }
-    } while (betType < 1 || betType > 12);
+    } while (betType < 1 || betType > 14);
     return betType;
 }
 
@@ -322,37 +336,37 @@ void evaluateResult(int betType, int bet, int number, int color, int tier, int n
         case 2:
         case 3:
             if (color == getNumberColor(winningNumber)) 
-                {win = bet * 2;}
+                {win = bet * 1;}
             break;
 
         case 4:
             if ((tier == 1 && winningNumber >= 1 && winningNumber <= 12) ||
                 (tier == 2 && winningNumber >= 13 && winningNumber <= 24) ||
                 (tier == 3 && winningNumber >= 25 && winningNumber <= 36)) 
-                {win = bet * 3;}
+                {win = bet * 2;}
             break;
 
         case 5:
             if (winningNumber == numCheval1 || winningNumber == numCheval2) 
-                {win = bet * 18;}
+                {win = bet * 17;}
             break;
 
         case 6:
             if (winningNumber == carreNum1 || winningNumber == carreNum2 || winningNumber == carreNum3 || winningNumber == carreNum4) 
-                {win = bet * 9;}
+                {win = bet * 8;}
             break;
 
         case 7: 
             if ((column == 1 && winningNumber % 3 == 1) ||
                 (column == 2 && winningNumber % 3 == 2) ||
                 (column == 3 && winningNumber % 3 == 0 && winningNumber != 0)) 
-                {win = bet * 3;}
+                {win = bet * 2;}
             break;
 
         case 8: 
             if ((columnsChoice == 1 && (winningNumber % 3 == 1 || winningNumber % 3 == 2)) ||
                 (columnsChoice == 2 && (winningNumber % 3 == 2 || (winningNumber % 3 == 0 && winningNumber != 0)))) 
-                {win = bet * 2;}
+                {win = bet * 0.5;}
             break;
 
         case 9: 
@@ -370,12 +384,21 @@ void evaluateResult(int betType, int bet, int number, int color, int tier, int n
 
         case 11:
             if (winningNumber >= 19 && winningNumber <= 36) 
-                {win = bet * 2;}
+                {win = bet * 1;}
             break;
 
         case 12:
             if (winningNumber >= 1 && winningNumber <= 18) 
-                {win = bet * 2;}
+                {win = bet * 1;}
+            break;
+
+        case 13:
+            if (winningNumber != 0 && winningNumber % 2 == 0) 
+                {win = bet * 1;}
+            break;
+        case 14:
+            if (winningNumber != 0 && winningNumber % 2 != 0) 
+                {win = bet * 1;}
             break;
     }
 
@@ -395,7 +418,8 @@ float roulette_game(float credits) {
     time_t start, end;
     float elapsed;
     srand((unsigned int)time(NULL));
-    printf("\n Bienvenue a la roulette! Vous avez %d pieces.\n", balance);
+    RouletteIntroTexte();
+    printf("\n Bienvenue a la roulette! Vous avez %d pieces.\n", balance);                                                                                
 
 
     while (balance > 0) {
