@@ -43,7 +43,7 @@ int lobby()
                 player.credits = slots_game(player.credits);
                 break;
             case 4:
-                printf("Vous avez choisi Roulette");
+                printf("Vous avez choisi Roulette\n\n\n");
                 player.credits = roulette_game(player.credits);
                 break;
             case 5:
