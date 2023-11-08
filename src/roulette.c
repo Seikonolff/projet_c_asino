@@ -1,7 +1,14 @@
+// Reste à faire 
+// -------> V1.4 : Jouer à la roulette française avec un seul joueur mais en pouvant faire plusieurs paris sur un même tirage.
+// -------> V1.5 :1.5 : Pouvoir jouer à la roulette française seul avec toutes les règles du jeu et afficher les tirages précédents s'il y en a.
+// -------> V2: Modelisation graphique.
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 #define RED 0
 #define BLACK 1
@@ -11,6 +18,9 @@
 #define TWO_LINES 10
 #define PASSE 11
 #define MANQUE 12
+#define PAIR 13
+#define IMPAIR 14
+
 
 void RouletteTable() {
     printf("     +------+------+------+------+------+------+------+------+------+------+------+------+--------+\n");
@@ -26,15 +36,37 @@ void RouletteTable() {
     printf("     +------+------+------+------+------+------+------+------+------+------+------+------+--------+\n");
 }
 
+void RouletteIntroTexte(){
+    printf("######                                                        #####\n");
+    printf("#     #  ####  #    # #      ###### ##### ##### ######       #     #   ##   #    # ######\n");
+    printf("#     # #    # #    # #      #        #     #   #            #        #  #  ##  ## #\n");
+    printf("######  #    # #    # #      #####    #     #   #####        #  #### #    # # ## # #####\n");
+    printf("#   #   #    # #    # #      #        #     #   #            #     # ###### #    # #\n");
+    printf("#    #  #    # #    # #      #        #     #   #            #     # #    # #    # #\n");
+    printf("#     #  ####   ####  ###### ######   #     #   ######        #####  #    # #    # ######\n");
+}
+
+void clear_input_buffer() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF) { } // Vider le buffer d'entrée
+}
+
 int userbet(int balance) {
     int bet;
+    bool valid_input;
     do {
+        
+        sleep (3);
         printf("\n\n FAITES VOS JEUX! \n\n");
         RouletteTable();
         printf("Placez votre mise (0 pour quitter) : ");
         
-        scanf("%d", &bet);
-        if (bet < 0 || bet > balance) {
+        valid_input = scanf("%d", &bet);
+        if (!valid_input) {
+            printf("Entree invalide. Veuillez entrer un nombre.\n");
+            clear_input_buffer(); 
+            bet = -1; 
+        } else if (bet < 0 || bet > balance) {
             printf("Mise invalide. Veuillez entrer une mise valide.\n");
         }
     } while (bet < 0 || bet > balance);
@@ -43,28 +75,44 @@ int userbet(int balance) {
 
 int getBetType() {
     int betType;
-    printf("Choisissez un type de mise :\n");
-    printf("1.  Chiffre specifique\n");
-    printf("2.  Rouge\n");
-    printf("3.  Noir\n");
-    printf("4.  Tiers (1-12, 13-24, 25-36)\n");
-    printf("5.  Cheval (deux numeros adjacents)\n");
-    printf("6.  Carre (quatre numeros en carre)\n");
-    printf("7.  Colonne (premiere, deuxieme, troisieme)\n");
-    printf("8.  Deux colonnes adjacentes\n");
-    printf("9.  Ligne (trois numeros verticaux comme 1, 2, 3)\n");
-    printf("10. Deux lignes adjacentes (par exemple 1,2,3 et 4,5,6)\n");
-    printf("11. Passe (19 a 36)\n");
-    printf("12. Manque (1 a 18)\n");
-    scanf("%d", &betType);
+        bool valid_input;
+    do {
+        printf("Choisissez un type de mise :\n");
+        printf("1.  Chiffre specifique\n");
+        printf("2.  Rouge \n");
+        printf("3.  Noir \n");
+        printf("4.  Tiers (1-12, 13-24, 25-36)\n");
+        printf("5.  Cheval (deux numeros adjacents)\n");
+        printf("6.  Carre (quatre numeros en carre)\n");
+        printf("7.  Colonne (premiere, deuxieme, troisieme)\n");
+        printf("8.  Deux colonnes adjacentes\n");
+        printf("9.  Ligne (trois numeros verticaux comme 1, 2, 3)\n");
+        printf("10. Deux lignes adjacentes (par exemple 1,2,3 et 4,5,6)\n");
+        printf("11. Passe (19 a 36)\n");
+        printf("12. Manque (1 a 18)\n");
+        printf("13. Pair\n");
+        printf("14. Impair\n");
+    valid_input = scanf("%d", &betType);
+        if (!valid_input || betType < 1 || betType > 14) {
+            printf("Entree invalide. Veuillez entrer un nombre entre 1 et 14.\n");
+            clear_input_buffer();
+            betType = -1; // Pour continuer la boucle
+        }
+    } while (betType < 1 || betType > 14);
     return betType;
 }
 
 int getSpecificNumber() {
     int number;
+    bool valid_input;
     do {
         printf("Choisissez un numero (0-36) : ");
-        scanf("%d", &number);
+        valid_input = scanf("%d", &number);
+        if (!valid_input || number < 0 || number > 36) {
+            printf("Entree invalide. Veuillez entrer un nombre entre 0 et 36.\n");
+            clear_input_buffer();
+            number = -1; 
+        }
     } while (number < 0 || number > 36);
     return number;
 }
@@ -75,9 +123,15 @@ int getColor(int betType) {
 
 int getTier() {
     int tier;
+    bool valid_input;
     do {
         printf("Choisissez un tiers (1, 2, 3) : ");
-        scanf("%d", &tier);
+        valid_input = scanf("%d", &tier);
+        if (!valid_input || tier < 1 || tier > 3) {
+            printf("Entree invalide. Veuillez entrer un nombre entre 1 et 3.\n");
+            clear_input_buffer();
+            tier = -1; 
+        }
     } while (tier < 1 || tier > 3);
     return tier;
 }
@@ -133,31 +187,51 @@ bool areAdjacent(int num1, int num2) {
 }
 
 void getChevalNumbers(int *num1, int *num2) {
+    bool valid_input;
     do {
         printf("Entrez le premier numero (1-36) : ");
-        scanf("%d", num1);
+        valid_input = scanf("%d", num1);
+        if (!valid_input || *num1 < 1 || *num1 > 36) {
+            printf("Entree invalide. Veuillez entrer un nombre entre 1 et 36.\n");
+            clear_input_buffer();
+            continue; 
+        }
+
         printf("Entrez le deuxième numero (1-36) : ");
-        scanf("%d", num2);
-    } while (!areAdjacent(*num1, *num2));
+        valid_input = scanf("%d", num2);
+        if (!valid_input || *num2 < 1 || *num2 > 36) {
+            printf("Entree invalide. Veuillez entrer un nombre entre 1 et 36.\n");
+            clear_input_buffer();
+            *num1 = -1; 
+            continue; 
+        }
+    } while (!areAdjacent(*num1, *num2) || *num1 < 1 || *num1 > 36 || *num2 < 1 || *num2 > 36);
 }
 
 void getCarreNumbers(int *num1, int *num2, int *num3, int *num4) {
-    bool isValidSquare;
+    bool valid_input;
+    bool isValidSquare = false;
     do {
         printf("Entrez le premier numero (bas gauche) du carre (1-32) : ");
-        scanf("%d", num1);
+        valid_input = scanf("%d", num1);
+        if (!valid_input || *num1 < 1 || *num1 > 32) {
+            printf("Entree invalide. Veuillez entrer un nombre entre 1 et 32.\n");
+            clear_input_buffer();
+            continue; 
+        }
 
+        // Vérifiez si le numéro est dans la dernière colonne ou la dernière rangée (où un carré ne peut pas être formé)
         bool isLastColumn = (*num1 % 3 == 0);
         bool isLastRow = *num1 > 32;
-
         isValidSquare = !isLastColumn && !isLastRow;
         
         if (!isValidSquare) {
             printf("Numero invalide pour un carre. Veuillez choisir un autre numero.\n");
+            *num1 = -1; //réinitialiser le numéro pour répéter la boucle
         }
     } while (!isValidSquare);
 
-    // Les numéros qui forment le carré 
+    // Les numéros qui forment le carré sont déterminés par le premier numéro
     *num2 = *num1 + 1;
     *num3 = *num1 + 3;
     *num4 = *num1 + 4;
@@ -167,29 +241,62 @@ void getCarreNumbers(int *num1, int *num2, int *num3, int *num4) {
 
 int getColumn() {
     int column;
+    bool valid_input;
     do {
         printf("Choisissez une colonne (1 pour la premiere, 2 pour la deuxieme, 3 pour la troisieme, du bas vers le haut) : ");
-        scanf("%d", &column);
+        valid_input = scanf("%d", &column);
+        if (!valid_input || column < 1 || column > 3) {
+            printf("Entree invalide. Veuillez entrer un nombre entre 1 et 3.\n");
+            clear_input_buffer();
+            column = -1; 
+        }
     } while (column < 1 || column > 3);
+
+
+    printf("Les numeros dans cette colonne sont : ");
+    for (int i = column; i <= 36; i += 3) {
+        printf("%d ", i);
+    }
+    printf("\n");
     return column;
 }
 
 int getTwoColumns() {
     int columnsChoice;
+    bool valid_input;
     do {
-        printf("Choisissez deux colonnes adjacentes (1 en bas, 3 en haut) :\n");
-        printf("1 pour la premiere et la deuxieme colonne\n");
-        printf("2 pour la deuxieme et la troisieme colonne\n");
-        scanf("%d", &columnsChoice);
+        printf("Choisissez deux colonnes adjacentes (1 pour les colonnes 1 et 2, 2 pour les colonnes 2 et 3) : ");
+        valid_input = scanf("%d", &columnsChoice);
+        if (!valid_input || columnsChoice < 1 || columnsChoice > 2) {
+            printf("Entree invalide. Veuillez entrer 1 ou 2.\n");
+            clear_input_buffer();
+            columnsChoice = -1; 
+        }
     } while (columnsChoice < 1 || columnsChoice > 2);
+
+    int startColumn = (columnsChoice == 1) ? 1 : 2;
+    printf("Les numeros dans ces colonnes sont : ");
+    for (int i = startColumn; i <= 36; i += 3) {
+        printf("%d ", i);
+        if (i + 3 <= 36) {
+            printf("%d ", i + 3);
+        }
+    }
+    printf("\n");
     return columnsChoice;
 }
 
 int getLine() {
     int line;
+    bool valid_input;
     do {
         printf("Choisissez une ligne (1-12 de gauche a droite) : ");
-        scanf("%d", &line);
+        valid_input = scanf("%d", &line);
+        if (!valid_input || line < 1 || line > 12) {
+            printf("Entrée invalide. Veuillez entrer un nombre entre 1 et 12.\n");
+            clear_input_buffer();
+            line = -1; 
+        }
     } while (line < 1 || line > 12);
     
     int startNumber = (line - 1) * 3 + 1;
@@ -198,19 +305,30 @@ int getLine() {
 }
 
 int getTwoLines() {
-    int line;
+    int twoLinesChoice;
+    bool valid_input;
     do {
-        printf("Choisissez deux lignes adjacentes (1-11: 1 = lignes 1-2, 2 = lignes 2-3 etc... ) : ");
-        scanf("%d", &line);
-    } while (line < 1 || line > 11);
+        printf("Choisissez deux lignes adjacentes (1-11: 1 = lignes 1-2, 2 = lignes 2-3, etc...) : ");
+        valid_input = scanf("%d", &twoLinesChoice);
+        if (!valid_input || twoLinesChoice < 1 || twoLinesChoice > 11) {
+            printf("Entree invalide. Veuillez entrer un nombre entre 1 et 11.\n");
+            clear_input_buffer();
+            twoLinesChoice = -1; 
+        }
+    } while (twoLinesChoice < 1 || twoLinesChoice > 11);
     
-    int startNumber = (line - 1) * 3 + 1;
-    printf("Vous avez choisi les lignes contenant les numeros: %d, %d, %d et %d, %d, %d.\n", startNumber, startNumber + 1, startNumber + 2, startNumber + 3, startNumber + 4, startNumber + 5);
-    return line;
+    int startNumber = (twoLinesChoice - 1) * 3 + 1;
+    printf("Vous avez choisi les lignes contenant les numeros: %d, %d, %d et %d, %d, %d.\n", 
+           startNumber, startNumber + 1, startNumber + 2, 
+           startNumber + 3, startNumber + 4, startNumber + 5);
+    return twoLinesChoice;
 }
 
 void evaluateResult(int betType, int bet, int number, int color, int tier, int numCheval1, int numCheval2, int carreNum1, int carreNum2, int carreNum3, int carreNum4, int column, int columnsChoice, int lineChoice, int twoLinesChoice, int winningNumber, int *balance) {
     int win = 0;
+    int firstNumInLine;
+    int firstNumInTwoLines;
+    int lastNumInTwoLines;
 
     switch (betType) {
         case 1:
@@ -221,60 +339,69 @@ void evaluateResult(int betType, int bet, int number, int color, int tier, int n
         case 2:
         case 3:
             if (color == getNumberColor(winningNumber)) 
-                {win = bet * 2;}
+                {win = bet * 1;}
             break;
 
         case 4:
             if ((tier == 1 && winningNumber >= 1 && winningNumber <= 12) ||
                 (tier == 2 && winningNumber >= 13 && winningNumber <= 24) ||
                 (tier == 3 && winningNumber >= 25 && winningNumber <= 36)) 
-                {win = bet * 3;}
+                {win = bet * 2;}
             break;
 
         case 5:
             if (winningNumber == numCheval1 || winningNumber == numCheval2) 
-                {win = bet * 18;}
+                {win = bet * 17;}
             break;
 
         case 6:
             if (winningNumber == carreNum1 || winningNumber == carreNum2 || winningNumber == carreNum3 || winningNumber == carreNum4) 
-                {win = bet * 9;}
+                {win = bet * 8;}
             break;
 
         case 7: 
             if ((column == 1 && winningNumber % 3 == 1) ||
                 (column == 2 && winningNumber % 3 == 2) ||
                 (column == 3 && winningNumber % 3 == 0 && winningNumber != 0)) 
-                {win = bet * 3;}
+                {win = bet * 2;}
             break;
 
         case 8: 
             if ((columnsChoice == 1 && (winningNumber % 3 == 1 || winningNumber % 3 == 2)) ||
                 (columnsChoice == 2 && (winningNumber % 3 == 2 || (winningNumber % 3 == 0 && winningNumber != 0)))) 
-                {win = bet * 2;}
+                {win = bet * 0.5;}
             break;
 
         case 9: 
-            int firstNumInLine = (lineChoice - 1) * 3 + 1;
+            firstNumInLine = (lineChoice - 1) * 3 + 1;
             if (winningNumber >= firstNumInLine && winningNumber < firstNumInLine + 3) 
                 {win = bet * 11;}
             break;
 
         case 10: 
-            int firstNumInTwoLines = (twoLinesChoice - 1) * 3 + 1;
-            int lastNumInTwoLines = firstNumInTwoLines + 5; 
+            firstNumInTwoLines = (twoLinesChoice - 1) * 3 + 1;
+            lastNumInTwoLines = firstNumInTwoLines + 5; 
             if (winningNumber >= firstNumInTwoLines && winningNumber <= lastNumInTwoLines) 
                 {win = bet * 5;}
             break;
 
         case 11:
             if (winningNumber >= 19 && winningNumber <= 36) 
-                {win = bet * 2;}
+                {win = bet * 1;}
             break;
 
         case 12:
             if (winningNumber >= 1 && winningNumber <= 18) 
-                {win = bet * 2;}
+                {win = bet * 1;}
+            break;
+
+        case 13:
+            if (winningNumber != 0 && winningNumber % 2 == 0) 
+                {win = bet * 1;}
+            break;
+        case 14:
+            if (winningNumber != 0 && winningNumber % 2 != 0) 
+                {win = bet * 1;}
             break;
     }
 
@@ -288,13 +415,14 @@ void evaluateResult(int betType, int bet, int number, int color, int tier, int n
 
 }
 
-void roulette_game() {
-    int balance = 1000;
+float roulette_game(float credits) {
+    int balance = credits;
     int bet, betType;
     time_t start, end;
     float elapsed;
     srand((unsigned int)time(NULL));
-    printf("\n Bienvenue a la roulette! Vous avez %d pieces.\n", balance);
+    RouletteIntroTexte();
+    printf("\n Bienvenue a la roulette! Vous avez %d pieces.\n", balance);                                                                                
 
 
     while (balance > 0) {
@@ -345,6 +473,7 @@ void roulette_game() {
             case 10:
                 twoLinesChoice = getTwoLines();
             break;
+
         }
 
         int winningNumber = getWinningNumber();
@@ -354,5 +483,6 @@ void roulette_game() {
     }
 
     printf("Merci d'avoir joue a la roulette!\n\n");
+    return balance;
 }
 

@@ -4,6 +4,11 @@
         "stdio.h": "c",
         "type_traits": "c",
         "time.h": "c",
+<<<<<<< HEAD
         "blackjack.h": "c"
+=======
+        "stdlib.h": "c",
+        "random": "c"
+>>>>>>> 57a10db7b84bfe5a32bc804560f30e8c5df2fdd0
     }
 }

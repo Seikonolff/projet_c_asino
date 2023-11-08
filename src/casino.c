@@ -10,8 +10,12 @@ Player player;
 
 void initialize_casino()
 {
-    printf("Bienvenue au Casino !\n");
-    printf("Veuillez entrer votre credit\n");
+    printf("  _ _ _  ___  _    ___  ___  __ __  ___   ___  ___   ___  _ _  ___   ___  ___  ___  _  _ _  ___  \n");
+    printf(" | | | || __>| |  |  _>| . ||  |  || __> |_ _|| . | |_ _|| | || __> |  _>| . |/ __>| || | || . | \n");
+    printf(" | | | || _> | |_ | <__| | ||     || _>   | | | | |  | | |   || _>  | <__|   ||__ || ||   || | | \n");
+    printf(" |__/_/ |___>|___|`___/`___'|_|_|_||___>  |_| `___'  |_| |_|_||___> `___/|_|_|<___/|_||_|_|`___'\n");
+
+    printf("Veuillez entrer votre crédit initial\n");
     scanf("%f",&player.credits);
     //printf("%f\n",player.credits);
     //player.name += "";
@@ -21,11 +25,13 @@ void initialize_casino()
 
 int lobby()
 {
-    printf("Vous avez %f $.\n", player.credits);
-    printf("Selectionnez un jeu:\n1: Poker\n2: Blackjack\n3: Machine à sous\n4: Roulette\n5: Aller a la banque\n6: Quitter\n");
+    clear_terminal();
+    affichage_stack(player.credits);
+    printf("Vous avez %.22.f $.\n", player.credits);
+    printf("Veuillez sélectionner un jeu :\n1: Poker\n2: Blackjack\n3: Machine à sous\n4: Roulette\n5: Aller a la banque\n6: Quitter\n");
 
         int choix;
-        scanf("%d", &choix);
+        scanf(" %d", &choix);
 
         switch (choix) {
             case 1:
@@ -41,16 +47,18 @@ int lobby()
                 player.credits = slots_game(player.credits);
                 break;
             case 4:
-                printf("Vous avez choisi Roulette");
-                //roulette_game();
+                printf("Vous avez choisi Roulette\n\n\n");
+                player.credits = roulette_game(player.credits);
                 break;
             case 5:
-                printf("Vous avez choisi la banque.\nVeuillez saisir le montant du depot.\n");
+                clear_terminal();
+                affichage_stack(player.credits);
+                printf("Vous avez choisi la banque.\n Veuillez saisir le montant du depot.\n");
                 float depot;
-                scanf("%f",depot);
+                scanf("%f", &depot);
                 while(depot <= 0){
                     printf("Veuillez saisir un montal valide");
-                    scanf("%f", depot);
+                    scanf("%f", &depot);
                 }
                 player.credits += depot;
                 break;
