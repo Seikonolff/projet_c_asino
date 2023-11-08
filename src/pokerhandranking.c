@@ -8,6 +8,7 @@
 #define HEARTS   0x2000
 #define SPADES   0x1000
 
+#define ROYAL_FLUSH    0
 #define	STRAIGHT_FLUSH  1
 #define	FOUR_OF_A_KIND  2
 #define	FULL_HOUSE      3
@@ -17,8 +18,6 @@
 #define	TWO_PAIR        7
 #define	ONE_PAIR        8
 #define	HIGH_CARD       9
-
-const int prime_numbers[13] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41};
 
 // Attribuer à chaque carte un iddentifiant unique codé sur 32 bit 
 int getCardIdentifier(int rank, int suit) {
@@ -51,7 +50,7 @@ int getCardIdentifier(int rank, int suit) {
     card |= rank << 8; // Le décalage de 8 pour l'octet le plus à gauche
 
     // Les bits pour le nombre premier associé au rang de la carte
-    card |= prime_numbers[rank];
+    card |= primes[rank];
 
     return card;
 }
@@ -66,7 +65,8 @@ int hand_rank(unsigned short val)
     if (val > 322)  return FLUSH;            // 1277 flushes
     if (val > 166)  return FULL_HOUSE;       //  156 full house
     if (val > 10)   return FOUR_OF_A_KIND;   //  156 four-kind
-    return STRAIGHT_FLUSH;                   //   10 straight-flushes
+    if (val == 1)   return ROYAL_FLUSH;      // 1 Royal Flush (most powerfull hand wow)
+    return STRAIGHT_FLUSH;                   // 9 straight-flushes without Royal Flush
 }
 
 static unsigned find_fast(unsigned u)

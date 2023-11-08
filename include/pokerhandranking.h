@@ -1,6 +1,11 @@
 #ifndef POKERHANDRANKING_H
 #define POKERHANDRANKING_H
 
+typedef struct {
+    float blindMultiplier; // Multiplicateur pour la mise à la blinde
+    float bonusMultiplier; // Multiplicateur pour le bonus
+} HandPayout;
+
 int getCardIdentifier(int rank, int suit);
 int hand_rank(unsigned short val);
 static unsigned find_fast(unsigned u);
