@@ -45,7 +45,7 @@ int lobby()
                 player.credits = roulette_game(player.credits);
                 break;
             case 5:
-                printf("Vous avez choisi la banque.\nVeuillez saisir le montant du depot.\n");
+                printf("Vous avez choisi la banque.\n Veuillez saisir le montant du depot.\n");
                 float depot;
                 scanf("%f", &depot);
                 while(depot <= 0){

@@ -36,7 +36,6 @@ void printCard(const Card *card);
 void printHand(const PokerHand *hand);
 void printBoard(const Card *board, int numCards);
 void playerBet(Bets *playerHand, const Stage stage);
-//PokerHand evaluateBestHand(Card *holeCards, Card *communityCards);
 float poker_game(float playerCredits);
 
 #endif // POKER_H
