@@ -5,18 +5,78 @@
 #include <stdio.h> // pour printf et scanf
 #include <string.h> // pour strcpy
 #include <unistd.h> //pour usleep (en microsecondes)
-#define initial_stack 1000
+#include <math.h> //pour floor (arrondir a l'entier inférieur)
+
 #define nombre_item 4
 #define nombre_rouleaux 3
+#define mise_mini 10
 #define true 1
+#define false 0
 
 slot rouleaux[nombre_rouleaux]; //définition d'un tableau rouleaux de 3 structures slot
 
 char* item0; //définition de l'item du rouleau X
-//float stack = initial_stack;
 
+void clear_terminal(){
+    for (int i=0; i<80; i++)
+    {printf("\n");}
+}
+void affichage_stack(float stack_a_afficher){
+    printf("%95.s", " ");
+    printf("+--------------------+\n");
+    printf("%95.s", " ");
+    printf("|STACK: %10.2f $ |\n",stack_a_afficher);
+    printf("%95.s", " ");
+    printf("+--------------------+\n");
+    printf("\n \n");
+}
 
-void init_rouleaux()
+float mise_joueur(){
+    float mise;
+    printf("Combien voulez vous miser ?\n");
+    scanf("%f", &mise);
+    return mise;
+}
+
+float mise_conforme(float bet_joueur, float stack_joueur){
+    int playerbet_int;
+    playerbet_int = (int)bet_joueur;
+    if (bet_joueur <= stack_joueur){
+        if (bet_joueur >= mise_mini){
+            if (bet_joueur != playerbet_int){
+                clear_terminal();
+                affichage_stack(stack_joueur);
+                printf("Le jeton le plus petit est 1$, vous ne pouvez pas miser des centimes.\n");
+                return 3;
+            }
+            else {
+                return 0;}
+        }
+        else {
+            clear_terminal();
+            affichage_stack(stack_joueur);
+            printf("La mise minimale est de 10$.\n");
+            return 2;
+            }
+    }
+    else {
+        clear_terminal();
+        affichage_stack(stack_joueur);
+        printf("Pas assez d'argent pour miser %.2f $, votre mise max est de %.0f $ \n", bet_joueur, floor(stack_joueur));
+        return 1;
+        }
+}
+
+float cas_conformite(int cas_conforme, float bet_joueur_2, float stack_joueur2){
+    while (cas_conforme != 0){
+        bet_joueur_2 = mise_joueur();
+        cas_conforme = mise_conforme(bet_joueur_2, stack_joueur2);
+    }
+    return bet_joueur_2;
+    
+}
+
+void init_rouleaux() 
 {
 strcpy(rouleaux[0].nom_slot,"Rouleau 0");
 strcpy(rouleaux[1].nom_slot, "Rouleau 1");
@@ -30,9 +90,6 @@ void init_aleatoire()
 
 int tirage_slot()
 {
-    //srand(time(NULL)); //redemarrage du timer pour plus d'aléatoire
-    //rouleaux[rouleau].item = rand()%4;
-    //return rouleaux[rouleau].item;
     return rand()%nombre_item;
 }
 
@@ -55,14 +112,25 @@ int check_results()
             {return 0;}
         }
     if (rouleaux[0].item == rouleaux[1].item && rouleaux[1].item == rouleaux[2].item)
-    {return 3;}
+    {return 3;} //jackpot, 3 items identiques
 
     if (rouleaux[0].item == rouleaux[1].item || rouleaux[1].item == rouleaux[2].item || rouleaux[2].item == rouleaux[0].item)
-    {return 2;}
+    {return 2;} // 2 items identiques 
 
     if (rouleaux[0].item != rouleaux[1].item && rouleaux[1].item != rouleaux[2].item && rouleaux[2].item != rouleaux[0].item)
-    {return 1;}
+    {return 1;} //défaite, aucuns items identiques.
     return 0; //no gair nor loss
+}
+
+void affichage_results(int resultat, float benefice){
+        switch (resultat)
+        {
+        case 0 : printf("Desole, erreur dans le tirage, vous n'avez rien perdu.\n");break;
+        case 1 : printf("Vous avez perdu...\n");break;
+        case 2 : printf("Bravo ! Vous avez gagné %.2f $ \n", benefice);break;
+        case 3 : printf("JACKPOT!!!!!\nVous avez gagné %.2f $\n", benefice);break;
+        default: break;
+        }
 }
 
 float gain(float mise, int resultat){
@@ -80,34 +148,47 @@ float slots_game(float stack)
 {
     char reponse[10];
     float playerbet;
-    int playerbet_int;
     float profit;
-    printf("Début du jeu de la machine à sous ! \n Vous avez %f $ \n", stack);
-    //printf("Tapez 0 pour retourner au lobby, 1 pour jouer à la machine à sous.\n");
+    int choix;
+    init_rouleaux();
+
+    clear_terminal();
+    if (stack<mise_mini){
+        printf("Vous n'avez pas assez d'argent, allez a la banque.(o)\n");
+        scanf("%s",&reponse);
+        return stack;}
+
+    printf("Début du jeu de la machine à sous ! \n Vous avez %.2f $ \n", stack);
+    affichage_stack(stack);
+
+    printf("Choisissez une action.\n\n");
+    printf("0: Retourner au lobby.\n");
+    printf("1: Jouer a la machine a sous.\n");
+    scanf("%d",&choix);
+    switch (choix)
+    {
+    case 0: clear_terminal(); printf("Merci d'etre venu(e)!"); return stack; break;
+    case 1: break;
+    default:break;
+    }
 
     while (true){
-        printf("Combien voulez vous miser ?\n");
-        scanf("%f", &playerbet);
-        while (playerbet > stack){
-            printf("Pas assez d'argent pour miser %f $, votre mise max est de %f $ \n", playerbet, stack);
-            printf("Combien voulez vous miser ?\n");
-            scanf("%f", &playerbet);
-        }
-        while (playerbet < 10){
-            printf("La mise minimale est de 10$.\n");
-            printf("Combien voulez vous miser ?\n");
-            scanf("%f", &playerbet);
-        }
-        playerbet_int = (int)playerbet;
-        while (playerbet != playerbet_int){
-            printf("Le jeton le plus petit est 1$, vous ne pouvez pas miser des centimes.\nCombien voulez vous miser ?\n");
-            scanf("%f", &playerbet);
-        }
-        printf("Votre mise est de %f $ \n", playerbet);
+        clear_terminal();
+        affichage_stack(stack);
+        playerbet = mise_joueur();
+        playerbet = cas_conformite(mise_conforme(playerbet,stack),playerbet,stack);
         stack -= playerbet;
-        init_rouleaux();
+        clear_terminal();
+        affichage_stack(stack);
+        printf("Votre mise est de %.f $ \n", playerbet);
+        printf("Tirer pour lancer la machine a sous! (t)\n");
+        char tirage;
+        scanf("%s",&tirage);
+        clear_terminal();
         init_aleatoire();
+        printf("\n");
 
+        // AFFICHAGE DE LA MACHINE A SOUS
         for (int j=0; j<5; j++){
         for (int i = 0; i< nombre_rouleaux; i++)
         {
@@ -116,37 +197,31 @@ float slots_game(float stack)
         printf("%-20s |%-20s |%-20s |\n",affichage_item(0), affichage_item(1), affichage_item(2));
         sleep(0.1);
         }
+        // MACHINE A SOUS 
 
         profit = gain(playerbet, check_results());
         stack += profit;
-        switch (check_results())
-        {
-        case 0 : printf("Desole, erreur dans le tirage, vous n'avez rien perdu.\n");break;
-        case 1 : printf("Vous avez perdu...\n");break;
-        case 2 : printf("Bravo ! Vous avez gagné %f $ \n", profit);break;
-        case 3 : printf("JACKPOT!!!!!\nVous avez gagné %f $\n", profit);break;
-        default: break;
-        }
-        printf("Votre nouveau stack est %f $ \n", stack);
+        affichage_results(check_results(),profit);
+
+        printf("\n\n");
+        affichage_stack(stack);
+        printf("Votre nouveau stack est %.2f $ \n", stack);
+        printf("\n\n\n\n\n");
         printf("Voulez vous continuer à jouer ? (o/n)\n");
         scanf("%s", &reponse);
-
+        
         if(reponse[0]=='o'||reponse[0]=='O')//on regarde le premier cara de la chaine
             {
-            if(stack<10){
-                printf("Retournez a la banque pour deposer des $$$!!\n");
+            if(stack<mise_mini){
+                clear_terminal();
+                affichage_stack(stack);
+                printf("Plus assez d'argent, retournez a la banque pour deposer des $!!(o)\n");
+                //sleep(4);
+                scanf("%s",&reponse);
                 return stack; break;
                 }
+            //stack suffisant : on continue dans la boucle de jeu
             }
-        else { return stack; break;} //on continue dans la boucle de jeu
-        /*
-        if(reponse[0]=='n' || reponse[0]=='N'){
-            break;
-        }
-        else 
-            {
-            printf("Nous n'avons pas compris, merci de répondre par oui ou non \n");
-            }
-        */
+        else { return stack; break;} //on retourne au lobby avec le return / sortie de la boucle
     } 
 }  
