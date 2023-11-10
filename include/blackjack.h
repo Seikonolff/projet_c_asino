@@ -1,12 +1,13 @@
 #ifndef BLACKJACK_H
 #define BLACKJACK_H
 
-void blackjack_game(void);
-int tirerCarte(void);
+float blackjack_game(float playerStack);
+int tirerCarte(int tot);
 int croupier(int cartebanque);
 int tourjoueur(int cartejoueur);
-void gagnant(int total, int banque);
-void rejouer(void);
+float gagnant(int total, int banque, float stack_update, float player_bet);
+void rejouer(float newstack);
+float mise();
 
 
 #endif //BLACKJACK_H
