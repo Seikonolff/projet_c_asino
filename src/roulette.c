@@ -9,6 +9,7 @@
 #include <time.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <slots.h>
 
 #define RED 0
 #define BLACK 1
@@ -57,6 +58,7 @@ int userbet(int balance) {
     do {
         
         sleep (3);
+        clear_terminal();
         printf("\n\n FAITES VOS JEUX! \n\n");
         RouletteTable();
         printf("Placez votre mise (0 pour quitter) : ");
@@ -439,6 +441,7 @@ float roulette_game(float credits) {
         if (elapsed >= 30.0) {
             printf("\n\n RIEN NE VA PLUS! \n\n");
             printf("Temps ecoule pour choisir le type de pari! Retour au menu.\n");
+            sleep(3);
             break; // Retour menu
         }
         int number = 0, color = 0, tier = 0, numCheval1 = 0, numCheval2 = 0, carreNum1 = 0, carreNum2 = 0, carreNum3 = 0, carreNum4 = 0; 
