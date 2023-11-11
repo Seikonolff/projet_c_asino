@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h> // pour rand() et srand()
 #include <time.h> // pour time()
+#include <string.h>
 
 #define MAX_JOUEURS 1
 #define MISE_MINI 10
@@ -71,11 +72,13 @@ int tourjoueur(int cartejoueur) {
             printf("Vous avez tiré : %d\n", nouvelleCarte);
             cartejoueur += nouvelleCarte;
             printf("Votre main : %d\n", cartejoueur);
+            Hand(&nouvelleCarte,1);
         } else if (choix == 'd'){
             int nouvelleCarte = tirerCarte(cartejoueur);
             printf("Vous avez tiré : %d\n", nouvelleCarte);
             cartejoueur += nouvelleCarte;
             printf("Votre main : %d\n", cartejoueur);
+            Hand(&nouvelleCarte,1);
             break;
         }
         else {
@@ -86,12 +89,16 @@ int tourjoueur(int cartejoueur) {
     return cartejoueur;
 }
 
-int croupier(int cartebanque) {
+int croupier(int cartebanque, int HandC[]) {
+    int i = 2;
     while (cartebanque < 17) {
         int nouvelleCarte = tirerCarte(cartebanque);
+        HandC[i] = nouvelleCarte;
+        i += 1;
         printf("Le croupier a tiré : %d\n", nouvelleCarte);
         cartebanque += nouvelleCarte;
         printf("Main du croupier : %d\n", cartebanque);
+        Hand(HandC,i);
     }
     return cartebanque;
 }
@@ -100,7 +107,7 @@ float mise() {
     float bet;
     printf("Quel est votre mise ?");
     scanf(" %f", &bet);
-    if (mise < MISE_MINI) {
+    if (bet < MISE_MINI) {
         printf("La mise minimale est de 10$");
         return mise();
     }
@@ -109,6 +116,42 @@ float mise() {
     }
 }
 
+void Hand(int Hand[],int compteur) {
+    //const char *suits[4] = {"H", "S", "D", "C"};
+    const char *suits[4] = {"♥", "♠", "♦", "♣"};
+    //const char *values[13] = {"2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"};
+
+    // Imprime le haut de chaque carte
+    for (int i = 0; i < compteur; i++) {
+        printf("+-----+ ");
+    }
+    printf("\n");
+
+    // Imprime la valeur et le haut de la couleur de chaque carte
+    for (int i = 0; i < compteur; i++) {
+        printf("|%-2d   | ", Hand[i]); // %-2s pour aligner les valeurs à gauche avec deux caractères
+    }
+    printf("\n");
+
+    // Imprime la couleur de chaque carte
+    for (int i = 0; i < compteur; i++) {
+        
+        printf("|  %s  | ", suits[rand()% 3]);
+    }
+    printf("\n");
+
+    // Imprime la valeur et le bas de la couleur de chaque carte
+    for (int i = 0; i < compteur; i++) {
+        printf("|   %-2d| ", Hand[i]); // %-2s pour aligner les valeurs à gauche avec deux caractères
+    }
+    printf("\n");
+
+    // Imprime le bas de chaque carte
+    for (int i = 0; i < compteur; i++) {
+        printf("+-----+ ");
+    }
+    printf("\n");
+}
 
 
 float blackjack_game(float playerStack) {
@@ -118,6 +161,7 @@ float blackjack_game(float playerStack) {
     int totalJoueurs[MAX_JOUEURS] = {0};
     int totalCroupier = 0;
     int nombreJoueurs;
+    int HandCroupier[5];
 
     printf("Entrez le nombre de joueurs (1-%d) : ", MAX_JOUEURS);
     scanf("%d", &nombreJoueurs);
@@ -153,19 +197,24 @@ float blackjack_game(float playerStack) {
 
     totalCroupier += tirerCarte(totalCroupier);
     printf("Main du croupier: %d\n", totalCroupier);
+    HandCroupier[0] = totalCroupier;
+    Hand(HandCroupier,1);
 
     for (int i = 0; i < nombreJoueurs; i++) {
         printf("Première carte du joueur %d : %d\n", i + 1, cartesJoueurs[i][0]);
+        Hand(cartesJoueurs[i], 1);
     }
-
-    totalCroupier += tirerCarte(totalCroupier);
+    
+    HandCroupier[1] = tirerCarte(totalCroupier);
+    totalCroupier += HandCroupier[1];
 
     for (int i = 0; i < nombreJoueurs; i++) {
         printf("Deuxième carte du joueur %d : %d\n", i + 1, cartesJoueurs[i][1]);
+        Hand(cartesJoueurs[i],2);
     }
 
     for (int i = 0; i < nombreJoueurs; i++) {
-        printf("Main du joueur %d : %d\n", i + 1, totalJoueurs[i]);
+        printf("Votre main : %d\n", totalJoueurs[i]);
     }
 
     // Tours des joueurs.
@@ -178,7 +227,7 @@ float blackjack_game(float playerStack) {
             if (choix == 'o') {
                 float doublage = pari*2;  // Doublez la mise.
                 playerStack -= doublage;  // Retirez le montant de la mise du stack.
-                printf("Vous avez split votre jeu. Votre mise est maintenant de : %d\n", doublage);
+                printf("Vous avez split votre jeu. Votre mise est maintenant de : %f\n", doublage);
                 
                 int jeu1 = totalJoueurs[i]/2;
                 int jeu2 = totalJoueurs[i]/2;
@@ -196,7 +245,7 @@ float blackjack_game(float playerStack) {
                 printf("Main du croupier : %d\n\n", totalCroupier);
             
                 // Tour du croupier.
-                totalCroupier = croupier(totalCroupier);
+                totalCroupier = croupier(totalCroupier, HandCroupier);
 
                 // Détermination des gagnants.
                     float update1 = gagnant(jeu1,totalCroupier,playerStack,pari);
@@ -212,7 +261,7 @@ float blackjack_game(float playerStack) {
             printf("Main du croupier : %d\n\n", totalCroupier);
         
             // Tour du croupier.
-            totalCroupier = croupier(totalCroupier);
+            totalCroupier = croupier(totalCroupier, HandCroupier);
 
             // Détermination des gagnants.
             float update3 = gagnant(totalJoueurs[i], totalCroupier, playerStack, pari);
@@ -226,7 +275,7 @@ float blackjack_game(float playerStack) {
         printf("Main du croupier : %d\n\n", totalCroupier);
     
         // Tour du croupier.
-        totalCroupier = croupier(totalCroupier);
+        totalCroupier = croupier(totalCroupier, HandCroupier);
 
         // Détermination des gagnants.
         float update4 = gagnant(totalJoueurs[i], totalCroupier, playerStack, pari);
