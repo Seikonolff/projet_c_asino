@@ -154,7 +154,7 @@ float slots_game(float stack)
 
     clear_terminal();
     if (stack<mise_mini){
-        printf("Vous n'avez pas assez d'argent, allez a la banque.(o)\n");
+        printf("Vous n'avez pas assez d'argent, allez à la banque.(o)\n");
         scanf("%s",&reponse);
         return stack;}
 
@@ -163,11 +163,11 @@ float slots_game(float stack)
 
     printf("Choisissez une action.\n\n");
     printf("0: Retourner au lobby.\n");
-    printf("1: Jouer a la machine a sous.\n");
+    printf("1: Jouer à la machine à sous.\n");
     scanf("%d",&choix);
     switch (choix)
     {
-    case 0: clear_terminal(); printf("Merci d'etre venu(e)!"); return stack; break;
+    case 0: clear_terminal(); printf("Merci d'être venu(e)!"); return stack; break;
     case 1: break;
     default:break;
     }
@@ -181,7 +181,7 @@ float slots_game(float stack)
         clear_terminal();
         affichage_stack(stack);
         printf("Votre mise est de %.f $ \n", playerbet);
-        printf("Tirer pour lancer la machine a sous! (t)\n");
+        printf("Tirer pour lancer la machine à sous! (t)\n");
         char tirage;
         scanf("%s",&tirage);
         clear_terminal();
@@ -215,7 +215,7 @@ float slots_game(float stack)
             if(stack<mise_mini){
                 clear_terminal();
                 affichage_stack(stack);
-                printf("Plus assez d'argent, retournez a la banque pour deposer des $!!(o)\n");
+                printf("Plus assez d'argent, retournez à la banque pour deposer des $!!(o)\n");
                 //sleep(4);
                 scanf("%s",&reponse);
                 return stack; break;
