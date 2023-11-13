@@ -40,7 +40,7 @@ int lobby()
                 break;
             case 2:
                 printf("Vous avez choisi Blackjack.\n");
-                blackjack_game();
+                player.credits = blackjack_game(player.credits);
                 break;
             case 3:
                 printf("Vous avez choisi Machine à sous.\n");
