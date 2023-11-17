@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 #define RED 0
 #define BLACK 1
@@ -54,6 +55,8 @@ int userbet(int balance) {
     int bet;
     bool valid_input;
     do {
+        
+        sleep (3);
         printf("\n\n FAITES VOS JEUX! \n\n");
         RouletteTable();
         printf("Placez votre mise (0 pour quitter) : ");
