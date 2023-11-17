@@ -5,6 +5,14 @@
         "type_traits": "c",
         "time.h": "c",
         "stdlib.h": "c",
-        "random": "c"
+        "random": "c",
+        "array": "cpp",
+        "string_view": "cpp",
+        "initializer_list": "cpp",
+        "optional": "c",
+        "system_error": "c",
+        "functional": "c",
+        "tuple": "c",
+        "utility": "c"
     }
 }
