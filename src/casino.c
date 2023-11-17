@@ -27,7 +27,7 @@ int lobby()
 {
     clear_terminal();
     affichage_stack(player.credits);
-    printf("Vous avez %.22.f $.\n", player.credits);
+    printf("Vous avez $%.2f.\n", player.credits);
     printf("Veuillez sélectionner un jeu :\n1: Poker\n2: Blackjack\n3: Machine à sous\n4: Roulette\n5: Aller a la banque\n6: Quitter\n");
 
         int choix;
@@ -40,7 +40,7 @@ int lobby()
                 break;
             case 2:
                 printf("Vous avez choisi Blackjack.\n");
-                blackjack_game();
+                player.credits = blackjack_game(player.credits);
                 break;
             case 3:
                 printf("Vous avez choisi Machine à sous.\n");

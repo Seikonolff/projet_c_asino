@@ -4,7 +4,23 @@
         "stdio.h": "c",
         "type_traits": "c",
         "time.h": "c",
+<<<<<<< HEAD
+        "blackjack.h": "c"
+=======
         "stdlib.h": "c",
+<<<<<<< HEAD
+        "random": "c",
+        "array": "cpp",
+        "string_view": "cpp",
+        "initializer_list": "cpp",
+        "optional": "c",
+        "system_error": "c",
+        "functional": "c",
+        "tuple": "c",
+        "utility": "c"
+=======
         "random": "c"
+>>>>>>> 57a10db7b84bfe5a32bc804560f30e8c5df2fdd0
+>>>>>>> 5b3680933f45ebf2a716e171ac91f833eb6f06a4
     }
 }
