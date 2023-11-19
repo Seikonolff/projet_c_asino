@@ -1,6 +1,5 @@
 // Reste à faire 
 // -------> V1.4 : Jouer à la roulette française avec un seul joueur mais en pouvant faire plusieurs paris sur un même tirage.
-// -------> V1.5 :1.5 : Pouvoir jouer à la roulette française seul avec toutes les règles du jeu et afficher les tirages précédents s'il y en a.
 // -------> V2: Modelisation graphique.
 
 
@@ -21,7 +20,27 @@
 #define MANQUE 12
 #define PAIR 13
 #define IMPAIR 14
+#define MAX_NUMBERS_STORED 3
 
+int lastWinningNumbers[MAX_NUMBERS_STORED] = {0};
+
+void Affichage_lastsnums(){ //Merci Norman pour la fonction 
+    printf("%95.s", " ");
+    printf("+-------------------------------+\n");
+    printf("%95.s", " ");
+    printf("Derniers numéros: ");
+    for (int i = 0; i < MAX_NUMBERS_STORED; i++) {
+        if (lastWinningNumbers[i] != 0) {
+            printf("%d ", lastWinningNumbers[i]);
+        } else {
+            printf("X "); 
+        }
+    }
+    printf("\n");
+    printf("%95.s", " ");
+    printf("+-------------------------------+\n");
+    printf("\n \n");
+}
 
 void RouletteTable() {
     printf("     +------+------+------+------+------+------+------+------+------+------+------+------+--------+\n");
@@ -57,9 +76,10 @@ int userbet(int balance) {
     bool valid_input;
     do {
         
-        sleep (3);
+        sleep (5);
         clear_terminal();
         printf("\n\n FAITES VOS JEUX! \n\n");
+        Affichage_lastsnums(MAX_NUMBERS_STORED);
         RouletteTable();
         printf("Placez votre mise (0 pour quitter) : ");
         
@@ -142,6 +162,10 @@ int getWinningNumber() {
     int winningNumber = rand() % 37;
     printf("\n\n RIEN NE VA PLUS! \n\n");
     printf("La roulette tourne... Le numero gagnant est : %d\n", winningNumber);
+        for (int i = MAX_NUMBERS_STORED - 1; i > 0; i--) {
+        lastWinningNumbers[i] = lastWinningNumbers[i - 1];
+    }
+    lastWinningNumbers[0] = winningNumber;
     return winningNumber;
 }
 
@@ -441,7 +465,7 @@ float roulette_game(float credits) {
         if (elapsed >= 30.0) {
             printf("\n\n RIEN NE VA PLUS! \n\n");
             printf("Temps ecoule pour choisir le type de pari! Retour au menu.\n");
-            sleep(3);
+            sleep(5);
             break; // Retour menu
         }
         int number = 0, color = 0, tier = 0, numCheval1 = 0, numCheval2 = 0, carreNum1 = 0, carreNum2 = 0, carreNum3 = 0, carreNum4 = 0; 
