@@ -59,9 +59,9 @@ void dealHands(Card *deck, Card *playerHand, Card *dealerHand)
     }
 }
 
-void dealBoard(Card *deck, Card *board, int numCards) 
+void dealBoard(Card *deck, Card *board) 
 {
-    for (int i = 0; i < numCards; i++) 
+    for (int i = 0; i < 5; i++) 
     {
         board[i] = deck[currentCardIndex++];
     }
@@ -138,6 +138,15 @@ void printHiddenCard(int numCards)
         printf("+-----+ ");
     }
     printf("\n");
+}
+
+void printDeck(Card deck[], int size) {
+    const char *suits[4] = {"coeur", "pique", "carreau", "trefle"};
+    const char *values[13] = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
+
+    for (int i = 0; i < size; i++) {
+        printf("Card %d: %s of %s, ID: %d\n", i + 1, values[deck[i].value], suits[deck[i].suit], deck[i].id);
+    }
 }
 
 void printStack(float stack_a_afficher)
@@ -411,16 +420,11 @@ float playerBet(Bets *playerBoard, const float playerStack, const Stage stage ) 
             break;
         
         case TURNRIVER :
-            if(playerStack < playerBoard->bet)
-            {
-                printf("vous n'avez pas assez d'argent pour jouer.\n");
-                return 0;
-            }
             printf("Voulez-vous jouer ? \n");
-            printf("Mise mini de 1x la mise de base\n");
             printf("|| 0 pour check || ");
-                if (playerBoard->hasBet == 0)
+                if (playerBoard->hasBet == 0 && playerStack > playerBoard->bet)
                     printf("1 pour jouer 1x votre mise soit $%d || ", playerBoard->bet);
+                
                 printf("2 pour se coucher ||\n");
             do {
                 scanf(" %d", &input);
@@ -436,7 +440,7 @@ float playerBet(Bets *playerBoard, const float playerStack, const Stage stage ) 
                     return 0;
                     break;
                 case 1 :
-                    if( playerBoard->hasBet == 0)
+                    if( playerBoard->hasBet == 0 && playerStack > playerBoard->bet)
                     {
                         playerBoard->play =  playerBoard->bet;
                         playerBoard->hasBet = 1;
@@ -485,7 +489,7 @@ float gamePayout(const int playerHandValue, const int dealerHandValue, const Bet
     //avant de faire quoi que ce soit on regarde si le joueur s'est couché
     if(playerBoard.hasFolded == 1)
     {
-        printf("Vous vous êtes fold.\n vous récupérez votre mise de la case bonus.\n");
+        printf("Vous vous êtes fold.\nVous récupérez votre mise de la case bonus.\n");
         return 0 + playerBoard.bonus;
     }
 
@@ -542,6 +546,7 @@ float poker_game(float playerCredits)
         playerBoard.bonus = 0;
         playerBoard.hasBet = 0;
         playerBoard.hasFolded = 0;
+        currentCardIndex = 0;
         refreshDisplay();
 
         printStack(playerCredits);
@@ -570,7 +575,7 @@ float poker_game(float playerCredits)
         playerCredits -= 2*playerBoard.bet;
         refreshDisplay();
         printStack(playerCredits);
-        printf("vous avez misé $%d, la blinde suit.\n", playerBoard.bet); // faire le contrôle de saisie
+        printf("vous avez misé $%d, la blinde suit.\n", playerBoard.bet);
 
         char inputBonus;
         if(playerCredits != 0)
@@ -604,8 +609,12 @@ float poker_game(float playerCredits)
         Stage stage = PREFLOP;
 
         shuffleDeck(deck); // mélanger le paquet
-        dealHands(deck, playerHand, dealerHand); // distribue les mains 
-        dealBoard(deck, board, 5);
+        printDeck(deck, DECK_SIZE);
+        printf("card index = %d\n", currentCardIndex);
+        dealHands(deck, playerHand, dealerHand); // distribue les mains
+        printf("card index = %d\n", currentCardIndex); 
+        dealBoard(deck, board);
+        printf("card index = %d\n", currentCardIndex);
         displayGame(stage, playerHand, playerBoard, dealerHand, board);
         printStack(playerCredits);
         playerCredits -= playerBet(&playerBoard, playerCredits, stage);

@@ -35,7 +35,7 @@ void printCardTemp(const Card *card);
 void initDeck(Card *deck);
 void shuffleDeck(Card *deck);
 void dealHands(Card *deck, Card *playerHand, Card *dealerHand);
-void dealBoard(Card *deck, Card *board, int numCards);
+void dealBoard(Card *deck, Card *board);
 void printCards(const Card *board, int numCards, int hidden);
 void printHiddenCard(int numCards);
 void printStack(float stack_a_afficher);
@@ -49,5 +49,7 @@ float playerBet(Bets *playerBoard, const float playerStack, const Stage stage );
 float gamePayout(const int playerHandValue, const int dealerHandValue, const Bets playerBoard);
 float poker_game(float playerCredits);
 void sortHand(Card *hand, int size);
+
+void printDeck(Card deck[], int size);
 
 #endif // POKER_H
