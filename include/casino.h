@@ -2,7 +2,6 @@
 #define CASINO_H
 
 typedef struct {
-    //str name;
     float credits;
 } Player;
 
