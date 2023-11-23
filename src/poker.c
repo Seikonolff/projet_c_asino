@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #define DECK_SIZE 52
 
@@ -18,6 +19,11 @@
 #define	ONE_PAIR        8
 #define	HIGH_CARD       9
 
+#define RED  "\x1B[31m"
+#define GRN  "\x1B[32m"
+#define CYA  "\x1B[36m"
+#define WHT  "\033[37m"
+
 int currentCardIndex = 0;
 
 void initDeck(Card *deck)
@@ -28,11 +34,12 @@ void initDeck(Card *deck)
         for(int j = 0; j < 13; j++) { // pour chaque rang
             deck[i * 13 + j].suit = i;
             deck[i * 13 + j].value = j;
-            deck[i * 13 + j].id = getCardIdentifier(j , i);
+            deck[i * 13 + j].id = getCardIdentifier(i,j);
         }
     }
 }
-void shuffleDeck(Card *deck) {
+void shuffleDeck(Card *deck) 
+{
     srand(time(NULL));  // initialisation de la séquence aléatoire
     for (int i = 0; i < DECK_SIZE - 1; i++) {
         int j = i + rand() / (RAND_MAX / (DECK_SIZE - i) + 1);
@@ -43,56 +50,77 @@ void shuffleDeck(Card *deck) {
 }
 
 // fonction pour distribuer une main
-void dealHand(Card *deck, PokerHand *hand) {
-    for (int i = 0; i < 2; i++) {
-        hand->cards[i] = deck[currentCardIndex++];
+void dealHands(Card *deck, Card *playerHand, Card *dealerHand) 
+{
+    for (int i = 0; i < 2; i++) 
+    {
+        playerHand[i] = deck[currentCardIndex++];
+        dealerHand[i] = deck[currentCardIndex++];
     }
 }
 
-void dealBoard(Card *deck, Card *board, int numCards) {
-    for (int i = 0; i < numCards; i++) {
+void dealBoard(Card *deck, Card *board) 
+{
+    for (int i = 0; i < 5; i++) 
+    {
         board[i] = deck[currentCardIndex++];
     }
 }
 
-void printHand(const PokerHand *hand) 
+void printCards(const Card *board, int numCards, int hidden) 
 {
-    //const char *suits[4] = {"H", "S", "D", "C"};
     const char *suits[4] = {"♥", "♠", "♦", "♣"};
-    const char *values[13] = {"2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"};
+    const char *values[13] = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
 
     // Imprime le haut de chaque carte
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < numCards + hidden; i++) {
         printf("+-----+ ");
     }
     printf("\n");
 
     // Imprime la valeur et le haut de la couleur de chaque carte
-    for (int i = 0; i < 2; i++) {
-        printf("|%-2s   | ", values[hand->cards[i].value]); // %-2s pour aligner les valeurs à gauche avec deux caractères
+    for (int i = 0; i < numCards; i++)
+    {
+        printf("|"); // %-2s pour aligner les valeurs à gauche avec deux caractères
+        printColored(values[board[i].value],suits[board[i].suit],1);
+        printf("   | ");
     }
+
+    for (int i = 0; i < hidden; i++)
+        printf("|#####| ");
     printf("\n");
 
     // Imprime la couleur de chaque carte
-    for (int i = 0; i < 2; i++) {
-        printf("|  %s  | ", suits[hand->cards[i].suit]);
+    for (int i = 0; i < numCards; i++)
+    {
+        printf("|  ");
+        printColored(values[board[i].value],suits[board[i].suit],0);
+        printf("  | ");
     }
+    
+    for (int i = 0; i < hidden; i++)
+        printf("|#####| ");
     printf("\n");
 
     // Imprime la valeur et le bas de la couleur de chaque carte
-    for (int i = 0; i < 2; i++) {
-        printf("|   %-2s| ", values[hand->cards[i].value]); // %-2s pour aligner les valeurs à gauche avec deux caractères
+    for (int i = 0; i < numCards; i++)
+    {
+        printf("|   "); // %-2s pour aligner les valeurs à gauche avec deux caractères
+        printColored(values[board[i].value],suits[board[i].suit],1);
+        printf("| ");
     }
+    
+    for (int i = 0; i < hidden; i++)
+        printf("|#####| ");
     printf("\n");
 
     // Imprime le bas de chaque carte
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < numCards + hidden; i++) {
         printf("+-----+ ");
     }
     printf("\n");
 }
 
-// Imprime le haut de chaque carte cachée
 void printHiddenCard(int numCards) 
 {   
     for (int i = 0; i < numCards; i++) {
@@ -112,321 +140,73 @@ void printHiddenCard(int numCards)
     printf("\n");
 }
 
-void printBoard(const Card *board, int numCards, int hidden) {
-    //const char *suits[4] = {"H", "S", "D", "C"};
-    const char *suits[4] = {"♥", "♠", "♦", "♣"};
-    const char *values[13] = {"2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"};
+void printDeck(Card deck[], int size) {
+    const char *suits[4] = {"coeur", "pique", "carreau", "trefle"};
+    const char *values[13] = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
 
-    // Imprime le haut de chaque carte
-    for (int i = 0; i < numCards + hidden; i++) {
-        printf("+-----+ ");
+    for (int i = 0; i < size; i++) {
+        printf("Card %d: %s of %s, ID: %d\n", i + 1, values[deck[i].value], suits[deck[i].suit], deck[i].id);
     }
-    printf("\n");
+}
 
-    // Imprime la valeur et le haut de la couleur de chaque carte
-    for (int i = 0; i < numCards; i++)
-        printf("|%-2s   | ", values[board[i].value]); // %-2s pour aligner les valeurs à gauche avec deux caractères
-
-    for (int i = 0; i < hidden; i++)
-        printf("|#####| ");
-    printf("\n");
-
-    // Imprime la couleur de chaque carte
-    for (int i = 0; i < numCards; i++)
-        printf("|  %s  | ", suits[board[i].suit]);
-    
-    for (int i = 0; i < hidden; i++)
-        printf("|#####| ");
-    printf("\n");
-
-    // Imprime la valeur et le bas de la couleur de chaque carte
-    for (int i = 0; i < numCards; i++)
-        printf("|   %-2s| ", values[board[i].value]); // %-2s pour aligner les valeurs à gauche avec deux caractères
-    
-    for (int i = 0; i < hidden; i++)
-        printf("|#####| ");
-    printf("\n");
-
-    // Imprime le bas de chaque carte
-    for (int i = 0; i < numCards + hidden; i++) {
-        printf("+-----+ ");
+void printStack(float stack_a_afficher)
+{
+    printf("%95.s", " ");
+    printf("+--------------------+\n");
+    printf("%95.s", " ");
+    printf("|STACK: $%10.2f  |\n",stack_a_afficher);
+    /*
+    if(payout>0)
+    {
+        printf("%95.s", " ");
+        printf("|        + $%6.2f|\n",payout);
+        printf("%95.s", " ");
+        printf("|          ----------|\n");
+        printf("%95.s", " ");
+        printf("|           $%6.2f|\n",stack_a_afficher + payout);
     }
-    printf("\n");
+    */
+    printf("%95.s", " ");
+    printf("+--------------------+\n");
+    printf("\n \n");
 }
 
 void refreshDisplay(void)
 {
-    for(int i = 0; i < 30; i++)
+    for(int i = 0; i < 100; i++)
     {
         printf("\n");
     }
 }
 
-void displayGame(const Stage state, const PokerHand playerHand, const Bets playerBoard, const PokerHand dealerHand, const Card *board)
-{
-    refreshDisplay();
-    switch (state)
-    {
-    case PREFLOP:
-        printf("-----------------------| MAIN DU DEALER |------------------------\n");
-        printHiddenCard(2);
-        printf("--------------------------| PLATEAU |----------------------------\n");
-        printHiddenCard(5);
-        printf("-------------------------| VOTRE MAIN |--------------------------\n");
-        printHand(&playerHand);
-        printf("-----------------------------------------------------------------\n");
-        break;
-    
-    case FLOP:
-        printf("Le 1er tour des enchères est passé, le flop est révélé \n");
-        printf("\n");
-        printf("-----------------------| MAIN DU DEALER |------------------------\n");
-        printHiddenCard(2);
-        printf("--------------------------| PLATEAU |----------------------------\n");
-        printBoard(board, 3, 2);
-        printf("-------------------------| VOTRE MAIN |--------------------------\n");
-        printHand(&playerHand);
-        printf("-----------------------------------------------------------------\n");
-        break;
-    
-    case TURNRIVER:
-        printf("Le 2nd tour des enchères est passé, la turn et la river sont révélés \n");
-        printf("\n");
-        printf("-----------------------| MAIN DU DEALER |------------------------\n");
-        printHiddenCard(2);
-        printf("--------------------------| PLATEAU |----------------------------\n");
-        printBoard(board, 5, 0);
-        printf("-------------------------| VOTRE MAIN |--------------------------\n");
-        printHand(&playerHand);
-        printf("-----------------------------------------------------------------\n");
-        break;
-    
-    case REVEAL :
-        printf("Les enchères sont terminées, les cartes du dealer sont revélées \n");
-        printf("\n");
-        printf("-----------------------| MAIN DU DEALER |------------------------\n");
-        printHand(&dealerHand);
-        printf("--------------------------| PLATEAU |----------------------------\n");
-        printBoard(board, 5, 0);
-        printf("-------------------------| VOTRE MAIN |--------------------------\n");
-        printHand(&playerHand);
-        printf("-----------------------------------------------------------------\n");
-        break;
-    
-    default:
-        break;
-    }
+void printBettingBoard(const Bets *bets) 
+{ 
+    printf("                                                                                               +--------------------+\n");
+    printf("                                                                                               | BONUS | $%-9d |\n",bets->bonus);
+    printf("                                                                                               | BLIND | $%-9d |\n",bets->blind);
+    printf("                                                                                               | MISE  | $%-9d |\n",bets->bet);
+    printf("                                                                                               | JOUER | $%-9d |\n",bets->play);
+    printf("                                                                                               +--------------------+\n");
 
 }
 
-
-float playerBet(Bets *playerBoard, const Stage stage ) // Fonction qui se repète trop. Il faut changer la manière de faire + rajouter la possibilité de miser à convenance sur la case bonus
+void printColored(const char *value, const char *suit, int type) //type = 1 pour print une value 0 pour une couleur
 {
-    int input;
-    int inputBet;
+    const char *color;
 
-    switch (stage)
-    {
-        case PREFLOP : 
-            printf("Voulez-vous jouer ?\n");
-            printf("Mise mini de 3x ou 4x la mise de base.\n");
-            printf("|| 0 pour ne pas jouer || 1 pour jouer 3x votre mise soit %d || 2 pour jouer 4x votre mise soit %d || 3 pour miser sur bonus || \n", 3*playerBoard->bet, 4*playerBoard->bet);
-            scanf("%d", &input);
-            switch (input)
-            {
-                case 0 :
-                    printf("vous ne jouez pas.\n");
-                    return 0;
-                    break;
-                case 1 :
-                    playerBoard->play =  3*playerBoard->bet;
-                    printf("vous avez joue %d \n", playerBoard->play);
-                    playerBoard->hasBet = 1;
-                    return 3*playerBoard->bet;
-                    break;
-                case 2 :
-                    playerBoard->play =  4*playerBoard->bet;
-                    printf("vous avez joue %d \n", playerBoard->play);
-                    playerBoard->hasBet = 1;
-                    return 4*playerBoard->bet;
-                    break;
-                case 3 :
-                    printf("Entrez la valeur que vous voulez miser\n");
-                    scanf(" %d", &inputBet);
-                    //il faut rajouter une fonction qui fait un contôle de saisie
-                    playerBoard->bonus = inputBet;
-                    playerBoard->hasBonusBet = 1;
-                    return inputBet;
-                    break;
-
-                default :
-                    break;
-            }
-            break;
-
-        case FLOP :
-            printf("Voulez-vous jouer ?\n");
-            printf("Mise mini de 2x la mise de base\n");
-            printf("|| 0 pour ne pas miser || ");
-            if (playerBoard->hasBet == 0) {
-                printf("1 pour jouer 2x votre mise soit %d || ", 2 * playerBoard->bet);
-            }
-            if (playerBoard->hasBonusBet == 0) {
-                printf("2 pour miser sur bonus ||\n");
-            }
-            scanf("%d", &input);
-            switch (input)
-            {
-                case 0 :
-                    printf("vous ne jouez pas.\n");
-                    return 0;
-                    break;
-                case 1 :
-                    if( playerBoard->hasBet == 0)
-                    {
-                        playerBoard->play =  2*playerBoard->bet;
-                        playerBoard->hasBet = 1;
-                        printf("vous avez joué %d \n", playerBoard->play);
-                        return 2*playerBoard->bet;
-                        break;
-                    }
-                    else
-                    {
-                        printf("Option invalide.\n");
-                        return 0;
-                        break;
-                    } 
-                case 2 :
-                    if( playerBoard->hasBonusBet == 0)
-                    {
-                        printf("Entrez la valeur que vous voulez miser\n");
-                        scanf(" %d", &inputBet);
-                        //il faut rajouter une fonction qui fait un contôle de saisie
-                        playerBoard->bonus = inputBet;
-                        playerBoard->hasBonusBet = 1;
-                        return inputBet;
-                        break;
-                    }
-                    else
-                    {
-                        printf("Option invalide.\n");
-                        return 0;
-                        break;
-                    } 
-
-                default :
-                    break;
-            }
-            break;
+    if(strcmp(suit, "♥") == 0)
+        color = RED;
+    else if (strcmp(suit, "♣") == 0)
+        color = GRN;
+    else if (strcmp(suit, "♦") == 0)
+        color = CYA;
+    else
+        color = WHT;
+    if(type)
+        printf("%s%-2s\033[0m", color, value);
+    else
+        printf("%s%s\033[0m", color, suit);
         
-        case TURNRIVER :
-            printf("Voulez-vous jouer ? \n");
-            printf("Mise mini de 1x la mise de base\n");
-            printf("|| 0 pour ne pas miser || ");
-            if (playerBoard->hasBet == 0) {
-                printf("1 pour jouer 1x votre mise soit %d || ", playerBoard->bet);
-            }
-            if (playerBoard->hasBonusBet == 0) {
-                printf("2 pour miser sur bonus ||\n");
-            }
-            scanf("%d", &input);
-            switch (input)
-            {
-                case 0 :
-                    printf("vous ne jouez pas.\n");
-                    return 0;
-                    break;
-                case 1 :
-                    if( playerBoard->hasBet == 0)
-                    {
-                        playerBoard->play =  playerBoard->bet;
-                        playerBoard->hasBet = 1;
-                        printf("vous avez joué %d \n", playerBoard->play);
-                        return 2*playerBoard->bet;
-                        break;
-                    }
-                    else
-                    {
-                        printf("Option invalide.\n");
-                        return 0;
-                        break;
-                    } 
-                case 2 :
-                    if( playerBoard->hasBonusBet == 0)
-                    {
-                        printf("Entrez la valeur que vous voulez miser\n");
-                        scanf(" %d", &inputBet);
-                        //il faut rajouter une fonction qui fait un contôle de saisie
-                        playerBoard->bonus = inputBet;
-                        playerBoard->hasBonusBet = 1;
-                        return inputBet;
-                        break;
-                    }
-                    else
-                    {
-                        printf("Option invalide.\n");
-                        return 0;
-                        break;
-                    } 
-                default :
-                    break;
-            }
-            break;
-        
-        default :
-            printf("erreur lors de l'appel de la fonction playerBet\n");
-            break;
-    }
-}
-
-float gamePayout(const int playerHandValue, const int dealerHandValue, const Bets playerBoard)
-{
-    int payout = 0;
-
-    HandPayout payouts[] = {
-        {501, 51}, // rang 0
-        {51, 41}, //rang 1
-        {11, 31}, //rang 2
-        {4, 9}, //rang 3
-        {3.5, 8},    //rang 4
-        {2, 5},   //rang 5
-        {0, 4}, //rang 6
-        {0, 0}, //rang 7
-        {0, 0}, //rang 8
-        {0, 0} //rang 9
-    };
-
-    //printf("la première ligne de payout = rang %d multiplicateur mise = %d et bonus = %d \n", payouts[0].blindMultiplier, payouts[0].bonusMultiplier);
-
-    int playerHandRank = hand_rank(playerHandValue);
-    int dealerHandRank = hand_rank(dealerHandValue);
-
-    printRank(playerHandRank, PLAYER);
-    printRank(dealerHandRank, DEALER);
-
-    if (playerHandRank < dealerHandRank) {
-            printf("Le joueur gagne !\n");
-            return payout = 2*(playerBoard.bet + playerBoard.play) + playerBoard.blind*payouts[playerHandRank].blindMultiplier + playerBoard.bonus*payouts[playerHandRank].bonusMultiplier;
-        } else if (playerHandRank > dealerHandRank) {
-            printf("Le dealer gagne !\n");
-            return payout = 0 + playerBoard.bonus*payouts[playerHandRank].bonusMultiplier;
-        } else {
-            if (playerHandValue > dealerHandValue)
-            {
-                printf("le dealer gagne a la hauteur !\n");
-                return payout = 0 + playerBoard.bonus*payouts[playerHandRank].bonusMultiplier;
-            }
-            else if (playerHandValue < dealerHandValue)
-            {
-                printf("le joueur gagne a la hauteur !\n");
-                return payout = 2*(playerBoard.bet + playerBoard.play) + playerBoard.blind*payouts[playerHandRank].blindMultiplier + playerBoard.bonus*payouts[playerHandRank].bonusMultiplier;
-            }
-            else
-            {
-                printf("Le dealer et le joueur on la meme main !\n");
-                return payout = playerBoard.bet + playerBoard.play + playerBoard.blind + playerBoard.bonus*payouts[playerHandRank].bonusMultiplier;
-            }
-        }
 }
 
 void printRank(int rank, HandType type)
@@ -454,7 +234,7 @@ void printRank(int rank, HandType type)
         printf("%s une Suite !\n", owner);
         break;
     case THREE_OF_A_KIND :
-        printf("%s un Brelan\n", owner);
+        printf("%s un Brelan !\n", owner);
         break;
     case  TWO_PAIR :
         printf("%s une double paire !\n", owner);
@@ -471,18 +251,292 @@ void printRank(int rank, HandType type)
     }
 }
 
+void printWelcome(void)
+{
+    printf(".------..------..------..------..------..------..------..------.        .------..------..------..------..------.\n");
+    printf("|U.--. ||L.--. ||T.--. ||I.--. ||M.--. ||A.--. ||T.--. ||E.--. | .-.    |P.--. ||O.--. ||K.--. ||E.--. ||R.--. | .-.\n");
+    printf("| (||) || :/|: || :/|: || (||) || (||) || (||) || :/|: || (||) |((5))   | :/|: || :||: || :||: || (||) || :(): |((5))\n");
+    printf("| :||: || (__) || (__) || :||: || :||: || :||: || (__) || :||: | '-.-.  | (__) || :||: || :||: || :||: || ()() | '-.-.\n");
+    printf("| '--'U|| '--'L|| '--'T|| '--'I|| '--'M|| '--'A|| '--'T|| '--'E|  ((1)) | '--'P|| '--'O|| '--'K|| '--'E|| '--'R|  ((1))\n");
+    printf("`------'`------'`------'`------'`------'`------'`------'`------'   '-'  `------'`------'`------'`------'`------'   '-'  \n");
+}
+
+void displayGame(const Stage state, const Card *playerHand, const Bets playerBoard, const Card *dealerHand, const Card *board)
+{
+    refreshDisplay();
+    switch (state)
+    {
+    case PREFLOP:
+        printf("-----------------------| MAIN DU DEALER |------------------------\n");
+        printHiddenCard(2);
+        printf("--------------------------| PLATEAU |----------------------------\n");
+        printHiddenCard(5);
+        printf("-------------------------| VOTRE MAIN |--------------------------\n");
+        printCards(playerHand, 2, 0);
+        printf("-----------------------------------------------------------------\n");
+        printBettingBoard(&playerBoard);
+        break;
+    
+    case FLOP:
+        printf("Le 1er tour des enchères est passé, le flop est révélé \n");
+        printf("\n");
+        printf("-----------------------| MAIN DU DEALER |------------------------\n");
+        printHiddenCard(2);
+        printf("--------------------------| PLATEAU |----------------------------\n");
+        printCards(board, 3, 2);
+        printf("-------------------------| VOTRE MAIN |--------------------------\n");
+        printCards(playerHand, 2, 0);
+        printf("-----------------------------------------------------------------\n");
+        printBettingBoard(&playerBoard);
+        break;
+    
+    case TURNRIVER:
+        printf("Le 2nd tour des enchères est passé, la turn et la river sont révélés \n");
+        printf("\n");
+        printf("-----------------------| MAIN DU DEALER |------------------------\n");
+        printHiddenCard(2);
+        printf("--------------------------| PLATEAU |----------------------------\n");
+        printCards(board, 5, 0);
+        printf("-------------------------| VOTRE MAIN |--------------------------\n");
+        printCards(playerHand, 2, 0);
+        printf("-----------------------------------------------------------------\n");
+        printBettingBoard(&playerBoard);
+        break;
+    
+    case REVEAL :
+        printf("Les enchères sont terminées, les cartes du dealer sont revélées \n");
+        printf("\n");
+        printf("-----------------------| MAIN DU DEALER |------------------------\n");
+        printCards(dealerHand, 2, 0);
+        printf("--------------------------| PLATEAU |----------------------------\n");
+        printCards(board, 5, 0);
+        printf("-------------------------| VOTRE MAIN |--------------------------\n");
+        if(playerBoard.hasFolded == 1)
+            printHiddenCard(2);
+        else
+            printCards(playerHand, 2, 0);
+        printf("-----------------------------------------------------------------\n");
+        printBettingBoard(&playerBoard);
+        break;
+    
+    default:
+        break;
+    }
+
+}
+
+float playerBet(Bets *playerBoard, const float playerStack, const Stage stage ) // Fonction qui se repète trop. Il faut changer la manière de faire
+{
+    int input;
+    int inputBet;
+
+    switch (stage)
+    {
+        case PREFLOP :
+            if(playerStack < 4*playerBoard->bet)
+            {
+                printf("vous n'avez pas assez d'argent pour jouer.\n");
+                return 0;
+            }
+            printf("Voulez-vous jouer ?\n");
+            printf("Mise mini de 3x ou 4x la mise de base.\n");
+            printf("|| 0 pour ne pas check || 1 pour jouer 3x votre mise soit $%d || 2 pour jouer 4x votre mise soit $%d || \n", 3*playerBoard->bet, 4*playerBoard->bet);
+            int input;
+            do {
+                scanf(" %d", &input);
+
+                if (input < 0 || input > 2) {
+                    printf("Entrée invalide. Veuillez entrer 0, 1 ou 2.\n");
+                }
+            } while (input < 0 || input > 2);
+            
+            switch (input)
+            {
+                case 0 :
+                    printf("vous ne jouez pas.\n");
+                    return 0;
+                    break;
+                case 1 :
+                    playerBoard->play =  3*playerBoard->bet;
+                    printf("vous avez joue %d \n", playerBoard->play);
+                    playerBoard->hasBet = 1;
+                    return 3*playerBoard->bet;
+                    break;
+                case 2 :
+                    playerBoard->play =  4*playerBoard->bet;
+                    printf("vous avez joue %d \n", playerBoard->play);
+                    playerBoard->hasBet = 1;
+                    return 4*playerBoard->bet;
+                    break;
+                default :
+                    break;
+            }
+            break;
+
+        case FLOP :
+            if(playerStack < 2*playerBoard->bet)
+            {
+                printf("vous n'avez pas assez d'argent pour jouer.\n");
+                return 0;
+            }
+            printf("Voulez-vous jouer ?\n");
+            printf("Mise mini de 2x la mise de base\n");
+            printf("|| 0 pour check || ");
+                if (playerBoard->hasBet == 0)
+                    printf("1 pour jouer 2x votre mise soit $%d || ", 2 * playerBoard->bet);
+
+            do {
+                scanf(" %d", &input);
+
+                if (input != 0 && input != 1) {
+                    printf("Entrée invalide.\n");
+                }
+            } while (input != 0 && input != 1);
+            switch (input)
+            {
+                case 0 :
+                    printf("vous ne jouez pas.\n");
+                    return 0;
+                    break;
+                case 1 :
+                    if( playerBoard->hasBet == 0)
+                    {
+                        playerBoard->play =  2*playerBoard->bet;
+                        playerBoard->hasBet = 1;
+                        printf("vous avez joué $%d \n", playerBoard->play);
+                        return 2*playerBoard->bet;
+                        break;
+                    }
+                    else
+                    {
+                        printf("Option invalide.\n");
+                        return 0;
+                        break;
+                    } 
+
+                default :
+                    break;
+            }
+            break;
+        
+        case TURNRIVER :
+            printf("Voulez-vous jouer ? \n");
+            printf("|| 0 pour check || ");
+                if (playerBoard->hasBet == 0 && playerStack > playerBoard->bet)
+                    printf("1 pour jouer 1x votre mise soit $%d || ", playerBoard->bet);
+                
+                printf("2 pour se coucher ||\n");
+            do {
+                scanf(" %d", &input);
+
+                if (input < 0 || input > 2) {
+                    printf("Entrée invalide.\n");
+                }
+            } while (input < 0 || input > 2);
+            switch (input)
+            {
+                case 0 :
+                    printf("vous ne jouez pas.\n");
+                    return 0;
+                    break;
+                case 1 :
+                    if( playerBoard->hasBet == 0 && playerStack > playerBoard->bet)
+                    {
+                        playerBoard->play =  playerBoard->bet;
+                        playerBoard->hasBet = 1;
+                        printf("vous avez joué $%d \n", playerBoard->play);
+                        return playerBoard->bet;
+                        break;
+                    }
+                    else
+                    {
+                        printf("Option invalide.\n");
+                        return 0;
+                        break;
+                    }
+                case 2 :
+                    printf("Vous vous couchez\nBonne nuit...\n");
+                    playerBoard->hasFolded = 1;
+                    return 0;
+                    break;
+                default :
+                    break;
+            }
+            break;
+        
+        default :
+            printf("erreur lors de l'appel de la fonction playerBet\n");
+            break;
+    }
+}
+
+float gamePayout(const int playerHandValue, const int dealerHandValue, const Bets playerBoard)
+{
+    //tous les coefs ont été incrémentés de 1, on paye la mise selon son coef et on rend la mise 
+    HandPayout payouts[] = {
+        {501, 51},              //rang 0 : Quinte Flush Royale
+        {51, 41},               //rang 1 : Quinte Flush
+        {11, 31},               //rang 2 : Carré
+        {4, 9},                 //rang 3 : Full
+        {2.5, 8},               //rang 4 : Suite (Quinte)
+        {2, 5},                 //rang 5 : Couleur (Flush)
+        {0, 4},                 //rang 6 : Brelan
+        {0, 0},                 //rang 7 : Double paire
+        {0, 0},                 //rang 8 : Paire
+        {0, 0}                  //rang 9 : Hauteur
+    };
+
+    //avant de faire quoi que ce soit on regarde si le joueur s'est couché
+    if(playerBoard.hasFolded == 1)
+    {
+        printf("Vous vous êtes fold.\nVous récupérez votre mise de la case bonus.\n");
+        return 0 + playerBoard.bonus;
+    }
+
+    int playerHandRank = hand_rank(playerHandValue);
+    int dealerHandRank = hand_rank(dealerHandValue);
+
+    printRank(playerHandRank, PLAYER);
+    printRank(dealerHandRank, DEALER);
+
+    if (playerHandRank < dealerHandRank) {
+            printf("Le joueur gagne !\n");
+            return 2*(playerBoard.bet + playerBoard.play) + playerBoard.blind*payouts[playerHandRank].blindMultiplier + playerBoard.bonus*payouts[playerHandRank].bonusMultiplier;
+        } else if (playerHandRank > dealerHandRank) {
+            printf("Le dealer gagne !\n");
+            return playerBoard.bonus*payouts[playerHandRank].bonusMultiplier;
+        } else {
+            if (playerHandValue > dealerHandValue)
+            {
+                printf("le dealer gagne a la hauteur !\n");
+                return playerBoard.bonus*payouts[playerHandRank].bonusMultiplier;
+            }
+            else if (playerHandValue < dealerHandValue)
+            {
+                printf("le joueur gagne a la hauteur !\n");
+                return 2*(playerBoard.bet + playerBoard.play) + playerBoard.blind*payouts[playerHandRank].blindMultiplier + playerBoard.bonus*payouts[playerHandRank].bonusMultiplier;
+            }
+            else
+            {
+                printf("Le dealer et le joueur on la meme main !\n");
+                return playerBoard.bet + playerBoard.play + playerBoard.blind + playerBoard.bonus*payouts[playerHandRank].bonusMultiplier;
+            }
+        }
+}
+
 float poker_game(float playerCredits)
 {
     int pokerGame = POKER_ON;
 
     Card deck[DECK_SIZE];
-    PokerHand playerHand;
-    PokerHand dealerHand;
     Card board[5];
-
+    Card playerHand[2];
+    Card dealerHand[2];
     Bets playerBoard;
 
     initDeck(deck);
+    refreshDisplay();
+    printWelcome();
 
     while(pokerGame == POKER_ON)
     {
@@ -491,70 +545,144 @@ float poker_game(float playerCredits)
         playerBoard.play = 0;
         playerBoard.bonus = 0;
         playerBoard.hasBet = 0;
-        playerBoard.hasBonusBet = 0;
-
+        playerBoard.hasFolded = 0;
+        currentCardIndex = 0;
         refreshDisplay();
 
-        printf("Entrez la valeur de votre mise :\n");
-        scanf("%d",&playerBoard.bet);
+        printStack(playerCredits);
+        int maxBet = playerCredits/2 ; // Deux fois la valeur du stack
+        int minBet = 10;
+        int inputStatus;
+        do {
+            printf("Entrez votre mise (maximum $%d et minimum $%d) :\n", maxBet, minBet);
+            inputStatus = scanf("%d", &playerBoard.bet);
+
+            // Vider le buffer si la saisie n'est pas un nombre
+            while (inputStatus != 1) {
+                while (getchar() != '\n'); // Vider le buffer d'entrée
+                printf("Veuillez entrer un nombre valide.\n");
+                printf("Entrez votre mise (maximum %d) :\n", maxBet);
+                inputStatus = scanf("%d", &playerBoard.bet);
+            }
+
+            if (playerBoard.bet > maxBet)
+                printf("La mise ne peut pas dépasser deux fois la valeur de votre stack.\n");
+            else if(playerBoard.bet < minBet)
+                printf("La mise doit être supérieure à $%d \n", minBet);
+        } while (playerBoard.bet > maxBet || playerBoard.bet < minBet);
+
         playerBoard.blind = playerBoard.bet;
         playerCredits -= 2*playerBoard.bet;
-        printf("vous avez misé %d, la blinde suit.\n", playerBoard.bet); // faire le contrôle de saisie
+        refreshDisplay();
+        printStack(playerCredits);
+        printf("vous avez misé $%d, la blinde suit.\n", playerBoard.bet);
 
+        char inputBonus;
+        if(playerCredits != 0)
+        {
+            do 
+            {
+                printf("Voulez vous miser sur Bonus ? (o/n)\n");
+                scanf(" %c", &inputBonus);
+                if(inputBonus != 'o' && inputBonus != 'n')
+                    printf("Entrée invalide. Veuillez réessayer.\n");
+            }while(inputBonus != 'o' && inputBonus != 'n');
+
+            if(inputBonus == 'o' )
+            {
+                printf("Veuillez saisir votre mise sur Bonus\n");
+                int bonusBet;
+                do 
+                {
+                    scanf("%d", &bonusBet);
+
+                    if (bonusBet > playerCredits) {
+                        printf("Vous ne pouvez pas miser plus de crédits que vous n'en avez !\n");
+                    }
+                } while (bonusBet > playerCredits);
+
+                playerBoard.bonus = bonusBet;
+                playerCredits -= bonusBet;
+            }
+        }
+       
         Stage stage = PREFLOP;
 
         shuffleDeck(deck); // mélanger le paquet
-        dealHand(deck, &playerHand); // distribuer une main
-        dealHand(deck, &dealerHand); 
-        dealBoard(deck, board, 5);
+        printDeck(deck, DECK_SIZE);
+        printf("card index = %d\n", currentCardIndex);
+        dealHands(deck, playerHand, dealerHand); // distribue les mains
+        printf("card index = %d\n", currentCardIndex); 
+        dealBoard(deck, board);
+        printf("card index = %d\n", currentCardIndex);
         displayGame(stage, playerHand, playerBoard, dealerHand, board);
-        playerCredits -= playerBet(&playerBoard, stage);
+        printStack(playerCredits);
+        playerCredits -= playerBet(&playerBoard, playerCredits, stage);
+        sleep(2);
 
         stage = FLOP;
 
         displayGame(stage, playerHand, playerBoard, dealerHand, board);
-        playerCredits -= playerBet(&playerBoard, stage);
+        printStack(playerCredits);
+        playerCredits -= playerBet(&playerBoard, playerCredits, stage);
+        sleep(2);
         
         stage = TURNRIVER;
 
         displayGame(stage, playerHand, playerBoard, dealerHand, board);
-        playerCredits -= playerBet(&playerBoard, stage);
+        printStack(playerCredits);
+        playerCredits -= playerBet(&playerBoard, playerCredits, stage);
+        sleep(2);
         
         stage = REVEAL;
-        
-        displayGame(stage, playerHand, playerBoard, dealerHand, board);
 
         Card playerSevenCardHand[7];
         Card dealerSevenCardHand[7];
 
         // On copie les deux cartes du joueur et les cinq cartes du board dans le tableau de sept cartes
-        memcpy(playerSevenCardHand, playerHand.cards, sizeof(Card) * 2);
-        memcpy(&playerSevenCardHand[2], board, sizeof(Card) * 5);
+        memcpy(playerSevenCardHand, playerHand, sizeof(Card) * 2);
+        memcpy(&playerSevenCardHand[2], board, sizeof(Card) * 5); 
 
         // On copie les deux cartes du dealer et les cinq cartes du board dans le tableau de sept cartes
-        memcpy(dealerSevenCardHand, dealerHand.cards, sizeof(Card) * 2);
-        memcpy(&dealerSevenCardHand[2], board, sizeof(Card) * 5);
+        memcpy(dealerSevenCardHand, dealerHand, sizeof(Card) * 2); 
+        memcpy(&dealerSevenCardHand[2], board, sizeof(Card) * 5); 
 
-        playerCredits += gamePayout(eval_7hand(playerSevenCardHand), eval_7hand(dealerSevenCardHand), playerBoard);
-        printf("Vous avez désormais %2.f $\n",playerCredits);
-        
-        printf("Voulez-vous rejouer ?\n(o/n)\n");
-        char choixPoker;
-        scanf(" %c",&choixPoker);
+        displayGame(stage, playerHand, playerBoard, dealerHand, board);
+        sleep(3);
+        printStack(playerCredits);
+        float payout = gamePayout(eval_7hand(playerSevenCardHand, PLAYER), eval_7hand(dealerSevenCardHand, DEALER), playerBoard);
 
-        switch (choixPoker)
+        playerCredits += payout; //il faut revoir si c'est necessaire ou comment améliorer cette partie
+        if (payout > 0)
+            printf("la banque vous crédite de %.2f \n",payout);
+        else if (payout == 0)
+            printf("Vous perdez $%d\n", playerBoard.bet + playerBoard.blind + playerBoard.bonus + playerBoard.play);
+        printStack(playerCredits);
+        sleep(2);
+
+        if(playerCredits < 10 )
         {
-        case 'o':
-            break;
-        case 'n':
+            printf("Vous n'avez plus suffisament d'argent pour jouer !\n");
+            sleep(2);
+            printf("Allez donc vous refaire un virement vous voulez bien ?\n");
+            sleep(2);
             pokerGame = POKER_OFF;
             return playerCredits;
-            break;
+        }
         
-        default:
+        printf("Voulez-vous rejouer ? (o/n)\n");
+        char choixPoker;
+        do 
+            {
+                scanf(" %c", &choixPoker);
+                if(choixPoker != 'o' && choixPoker != 'n' && choixPoker != 'O' && choixPoker != 'N')
+                    printf("Entrée invalide. Veuillez réessayer.");
+            }while(choixPoker != 'o' && choixPoker != 'n' && choixPoker != 'O' && choixPoker != 'N');
+        
+        if(choixPoker == 'n' || choixPoker =='N')
+        {
             pokerGame = POKER_OFF;
             return playerCredits;
-            break;
         }
     }
     

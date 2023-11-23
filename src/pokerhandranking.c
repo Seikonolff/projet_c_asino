@@ -1,5 +1,8 @@
+//#include "pokerhandranking.h"
 #include "poker.h"
 #include "arrays.h"
+#include "string.h"
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -20,7 +23,7 @@
 #define	HIGH_CARD       9
 
 // Attribuer à chaque carte un iddentifiant unique codé sur 32 bit 
-int getCardIdentifier(int rank, int suit) {
+int getCardIdentifier(int suit, int rank) {
     int card = 0;
     switch (suit)
     {
@@ -104,9 +107,10 @@ unsigned short eval_5hand(const Card *hand) {
     return eval_5cards(&hand[0], &hand[1], &hand[2], &hand[3], &hand[4]);
 }
 
-unsigned short eval_7hand(const Card *hand) {
+unsigned short eval_7hand(const Card *hand, HandType type) {
     int i, j;
     Card subhand[5];
+    Card besthand[5];
     unsigned short q, best = 9999;
 
     for (i = 0; i < 21; i++) {
@@ -114,7 +118,37 @@ unsigned short eval_7hand(const Card *hand) {
             subhand[j] = hand[perm7[i][j]];
         q = eval_5hand(subhand);
         if (q < best)
+        {
             best = q;
+            for (j = 0; j < 5; j++)
+                besthand[j] = subhand[j];
+        }
     }
+    if(type == PLAYER)
+        printf("Main du joueur :\n");
+    else
+        printf("Main du croupier :\n");
+    sortHand(besthand, sizeof(besthand) / sizeof(besthand[0]));
+    printCards(besthand,5,0);
+
     return best;
+}
+
+void sortHand(Card *hand, int size) {
+    bool swapped;
+    for (int i = 0; i < size - 1; i++) {
+        swapped = false;
+        for (int j = 0; j < size - i - 1; j++) {
+            if (hand[j].value < hand[j + 1].value) {
+                // Échange les cartes
+                Card temp = hand[j];
+                hand[j] = hand[j + 1];
+                hand[j + 1] = temp;
+                swapped = true;
+            }
+        }
+        // Si aucun échange n'a été fait, le tableau est trié
+        if (!swapped)
+            break;
+    }
 }
