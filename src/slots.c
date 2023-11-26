@@ -9,9 +9,16 @@
 
 #define nombre_item 4
 #define nombre_rouleaux 3
-#define mise_mini 10
+#define mise_mini_slots 10
 #define true 1
 #define false 0
+
+enum ResultatJeu {
+    ERREUR_TIRAGE = 0,
+    DEFAITE = 1,
+    DEUX_ITEMS_IDENTIQUES = 2,
+    TROIS_ITEMS_IDENTIQUES = 3
+};
 
 slot rouleaux[nombre_rouleaux]; //définition d'un tableau rouleaux de 3 structures slot
 
@@ -38,11 +45,11 @@ float mise_joueur(){
     return mise;
 }
 
-float mise_conforme(float bet_joueur, float stack_joueur){
+float mise_conforme(float bet_joueur, float stack_joueur, float mise_mini_jeu){
     int playerbet_int;
     playerbet_int = (int)bet_joueur;
     if (bet_joueur <= stack_joueur){
-        if (bet_joueur >= mise_mini){
+        if (bet_joueur >= mise_mini_jeu){
             if (bet_joueur != playerbet_int){
                 clear_terminal();
                 affichage_stack(stack_joueur);
@@ -67,10 +74,10 @@ float mise_conforme(float bet_joueur, float stack_joueur){
         }
 }
 
-float cas_conformite(int cas_conforme, float bet_joueur_2, float stack_joueur2){
+float cas_conformite(int cas_conforme, float bet_joueur_2, float stack_joueur2, float mise_mini_cas){
     while (cas_conforme != 0){
         bet_joueur_2 = mise_joueur();
-        cas_conforme = mise_conforme(bet_joueur_2, stack_joueur2);
+        cas_conforme = mise_conforme(bet_joueur_2, stack_joueur2, mise_mini_cas);
     }
     return bet_joueur_2;
     
@@ -109,16 +116,17 @@ int check_results()
 {
     for (int j=0; j<3; j++){
         if (affichage_item(j) == "ERREUR") //strcmp renvoie 0 si les deux chaines sont identiques
-            {return 0;}
+            {return ERREUR_TIRAGE;}
         }
     if (rouleaux[0].item == rouleaux[1].item && rouleaux[1].item == rouleaux[2].item)
-    {return 3;} //jackpot, 3 items identiques
+    {return TROIS_ITEMS_IDENTIQUES;} //jackpot, 3 items identiques
 
     if (rouleaux[0].item == rouleaux[1].item || rouleaux[1].item == rouleaux[2].item || rouleaux[2].item == rouleaux[0].item)
-    {return 2;} // 2 items identiques 
+    {return DEUX_ITEMS_IDENTIQUES;} // 2 items identiques 
 
     if (rouleaux[0].item != rouleaux[1].item && rouleaux[1].item != rouleaux[2].item && rouleaux[2].item != rouleaux[0].item)
-    {return 1;} //défaite, aucuns items identiques.
+    {return DEFAITE;} //défaite, aucuns items identiques.
+    
     return 0; //no gair nor loss
 }
 
@@ -153,7 +161,7 @@ float slots_game(float stack)
     init_rouleaux();
 
     clear_terminal();
-    if (stack<mise_mini){
+    if (stack<mise_mini_slots){
         printf("Vous n'avez pas assez d'argent, allez à la banque.(o)\n");
         scanf("%s",&reponse);
         return stack;}
@@ -176,7 +184,7 @@ float slots_game(float stack)
         clear_terminal();
         affichage_stack(stack);
         playerbet = mise_joueur();
-        playerbet = cas_conformite(mise_conforme(playerbet,stack),playerbet,stack);
+        playerbet = cas_conformite(mise_conforme(playerbet,stack, mise_mini_slots),playerbet,stack,mise_mini_slots);
         stack -= playerbet;
         clear_terminal();
         affichage_stack(stack);
@@ -212,7 +220,7 @@ float slots_game(float stack)
         
         if(reponse[0]=='o'||reponse[0]=='O')//on regarde le premier cara de la chaine
             {
-            if(stack<mise_mini){
+            if(stack<mise_mini_slots){
                 clear_terminal();
                 affichage_stack(stack);
                 printf("Plus assez d'argent, retournez à la banque pour deposer des $!!(o)\n");
