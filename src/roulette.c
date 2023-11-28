@@ -1,8 +1,8 @@
 // Reste à faire 
-// -------> V1.4 : Jouer à la roulette française avec un seul joueur mais en pouvant faire plusieurs paris sur un même tirage.
-// -------> V2: Modelisation graphique.
+// ------->
+// ------->
 
-
+#include "roulette.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -22,41 +22,125 @@
 #define IMPAIR 14
 #define MAX_NUMBERS_STORED 3
 
+#define ANSI_RED   "\x1B[31m"
+#define ANSI_GREY "\x1B[30m"
+#define ANSI_GREEN "\x1B[32m"
+#define ANSI_WHITE "\033[37m"
+#define ANSI_BLINK   "\x1B[5m"
+#define ANSI_NOBLINK "\x1B[25m"
+
+
 int lastWinningNumbers[MAX_NUMBERS_STORED] = {0};
 
-void Affichage_lastsnums(){ //Merci Norman pour la fonction 
-    printf("%95.s", " ");
+// Structure
+typedef struct {
+    int betType;
+    int betAmount;
+    int specificNumber;
+    int color;
+    int tier;
+    int numCheval1, numCheval2;
+    int carreNum1, carreNum2, carreNum3, carreNum4;
+    int column, twoColumnsChoice, lineChoice, twoLinesChoice;
+} Bet;
+
+Bet getUserBet(int balance) {
+    Bet bet = {0};
+    bet.betAmount = userbet(balance);
+
+    if (bet.betAmount == 0) {
+        return bet; // Pas de nouveau pari
+    }
+
+    bet.betType = getBetType();
+
+    switch (bet.betType) {
+        case 1: // Chiffre spécifique
+            bet.specificNumber = getSpecificNumber();
+            break;
+        case 2: // Rouge
+        case 3: // Noir
+            bet.color = getColor(bet.betType);
+            break;
+        case 4: // Tiers
+            bet.tier = getTier();
+            break;
+        case 5: // Cheval
+            getChevalNumbers(&bet.numCheval1, &bet.numCheval2);
+            break;
+        case 6: // Carre
+            getCarreNumbers(&bet.carreNum1, &bet.carreNum2, &bet.carreNum3, &bet.carreNum4);
+            break;
+        case 7: // Colonne
+            bet.column = getColumn();
+            break;
+        case 8: // Deux colonnes
+            bet.twoColumnsChoice = getTwoColumns();
+            break;
+        case 9: // Ligne
+            bet.lineChoice = getLine();
+            break;
+        case 10: // Deux lignes
+            bet.twoLinesChoice = getTwoLines();
+            break;
+        case 11: // Passe
+        case 12: // Manque
+        case 13: // Pair
+        case 14: // Impair
+            // Pas de détails supplémentaires requis pour ces paris
+            break;
+    }
+
+    return bet;
+}
+
+void Display_LastNum_Balance(int balance) {
+    printf("%90.s", " ");
     printf("+-------------------------------+\n");
-    printf("%95.s", " ");
+    printf("%90.s", " ");
+    printf("Solde actuel: %d\n", balance);
+    printf("%90.s", " ");
+    printf("+-------------------------------+\n");
+    printf("%90.s", " ");
     printf("Derniers numéros: ");
     for (int i = 0; i < MAX_NUMBERS_STORED; i++) {
         if (lastWinningNumbers[i] != 0) {
-            printf("%d ", lastWinningNumbers[i]);
+            int color = getNumberColor(lastWinningNumbers[i]);
+
+            if (color == RED) {
+                printf(ANSI_RED "%d " ANSI_WHITE, lastWinningNumbers[i]);
+            } else if (color == BLACK) {
+                printf(ANSI_GREY "%d " ANSI_WHITE, lastWinningNumbers[i]);
+            } else {
+                printf(ANSI_GREEN "%d " ANSI_WHITE, lastWinningNumbers[i]);
+            }
+
         } else {
-            printf("X "); 
+            printf("X ");
         }
     }
     printf("\n");
-    printf("%95.s", " ");
+    printf("%90.s", " ");
     printf("+-------------------------------+\n");
     printf("\n \n");
 }
 
 void RouletteTable() {
     printf("     +------+------+------+------+------+------+------+------+------+------+------+------+--------+\n");
-    printf("     |      MANQUE (1 a 18)      |          IMPAIR           |           ROUGE(r)        |  TIER  |\n");
+    printf("     |      MANQUE (1 a 18)      |          IMPAIR           |           " ANSI_RED "ROUGE(r)" ANSI_WHITE "        |  TIER  |\n");
     printf("+----+------+------+------+------+------+------+------+------+------+------+------+------+   1    |\n");
-    printf("|    | 3(r) | 6(n) | 9(r) | 12(n)| 15(r)| 18(n)| 21(r)| 24(n)| 27(r)| 30(n)| 33(r)| 36(n)|--------+\n");
+    printf("|    | " ANSI_RED "3(r) " ANSI_WHITE "| " ANSI_GREY "6(n) " ANSI_WHITE "| " ANSI_RED "9(r) " ANSI_WHITE "| " ANSI_GREY "12(n)" ANSI_WHITE "| " ANSI_RED "15(r)" ANSI_WHITE "| " ANSI_GREY "18(n)" ANSI_WHITE "| " ANSI_RED "21(r)" ANSI_WHITE "| " ANSI_GREY "24(n)" ANSI_WHITE "| " ANSI_RED "27(r)" ANSI_WHITE "| " ANSI_GREY "30(n)" ANSI_WHITE "| " ANSI_RED "33(r)" ANSI_WHITE "| " ANSI_GREY "36(n)" ANSI_WHITE "|--------+\n");
     printf("|    +------+------+------+------+------+------+------+------+------+------+------+------+  TIER  |\n");
-    printf("| 0  | 2(n) | 5(r) | 8(n) | 11(n)| 14(r)| 17(n)| 20(n)| 23(r)| 26(n)| 29(n)| 32(r)| 35(n)|   2    |\n");
+    printf("| " ANSI_GREEN "0  " ANSI_WHITE "| " ANSI_GREY "2(n) " ANSI_WHITE "| " ANSI_RED "5(r) " ANSI_WHITE "| " ANSI_GREY "8(n) " ANSI_WHITE "| " ANSI_GREY "11(n)" ANSI_WHITE "| " ANSI_RED "14(r)" ANSI_WHITE "| " ANSI_GREY "17(n)" ANSI_WHITE "| " ANSI_GREY "20(n)" ANSI_WHITE "| " ANSI_RED "23(r)" ANSI_WHITE "| " ANSI_GREY "26(n)" ANSI_WHITE "| " ANSI_GREY "29(n)" ANSI_WHITE "| " ANSI_RED "32(r)" ANSI_WHITE "| " ANSI_GREY "35(n)" ANSI_WHITE "|   2    |\n");
     printf("|    +------+------+------+------+------+------+------+------+------+------+------+------+        |\n");
-    printf("|    | 1(r) | 4(n) | 7(r) | 10(n)| 13(n)| 16(r)| 19(r)| 22(n)| 25(r)| 28(n)| 31(n)| 34(r)|--------+\n");
+    printf("|    | " ANSI_RED "1(r) " ANSI_WHITE "| " ANSI_GREY "4(n) " ANSI_WHITE "| " ANSI_RED "7(r) " ANSI_WHITE "| " ANSI_GREY "10(n)" ANSI_WHITE "| " ANSI_GREY "13(n)" ANSI_WHITE "| " ANSI_RED "16(r)" ANSI_WHITE "| " ANSI_RED "19(r)" ANSI_WHITE "| " ANSI_GREY "22(n)" ANSI_WHITE "| " ANSI_RED "25(r)" ANSI_WHITE "| " ANSI_GREY "28(n)" ANSI_WHITE "| " ANSI_GREY "31(n)" ANSI_WHITE "| " ANSI_RED "34(r)" ANSI_WHITE "|--------+\n");
     printf("+----+------+------+------+------+------+------+------+------+------+------+------+------+  TIER  |\n");
-    printf("     |      PASSE (19 a 36)      |           PAIR            |            NOIR(n)        |   3    |\n");
+    printf("     |      PASSE (19 a 36)      |           PAIR            |            " ANSI_GREY "NOIR(n)" ANSI_WHITE "        |   3    |\n");
     printf("     +------+------+------+------+------+------+------+------+------+------+------+------+--------+\n");
 }
 
 void RouletteIntroTexte(){
+    printf(ANSI_BLINK); // Début du clignotement
     printf("######                                                        #####\n");
     printf("#     #  ####  #    # #      ###### ##### ##### ######       #     #   ##   #    # ######\n");
     printf("#     # #    # #    # #      #        #     #   #            #        #  #  ##  ## #\n");
@@ -64,6 +148,7 @@ void RouletteIntroTexte(){
     printf("#   #   #    # #    # #      #        #     #   #            #     # ###### #    # #\n");
     printf("#    #  #    # #    # #      #        #     #   #            #     # #    # #    # #\n");
     printf("#     #  ####   ####  ###### ######   #     #   ######        #####  #    # #    # ######\n");
+    printf(ANSI_NOBLINK); // Fin du clignotement
 }
 
 void clear_input_buffer() {
@@ -75,11 +160,7 @@ int userbet(int balance) {
     int bet;
     bool valid_input;
     do {
-        
-        sleep (5);
-        clear_terminal();
-        printf("\n\n FAITES VOS JEUX! \n\n");
-        Affichage_lastsnums(MAX_NUMBERS_STORED);
+        Display_LastNum_Balance(balance);
         RouletteTable();
         printf("Placez votre mise (0 pour quitter) : ");
         
@@ -160,12 +241,27 @@ int getTier() {
 
 int getWinningNumber() {
     int winningNumber = rand() % 37;
+    int color = getNumberColor(winningNumber);
+
     printf("\n\n RIEN NE VA PLUS! \n\n");
-    printf("La roulette tourne... Le numero gagnant est : %d\n", winningNumber);
-        for (int i = MAX_NUMBERS_STORED - 1; i > 0; i--) {
+    printf("La roulette tourne... Le numero gagnant est : ");
+    
+    if (color == RED) {
+        printf(ANSI_RED "%d" ANSI_WHITE, winningNumber);
+    } else if (color == BLACK) {
+        printf(ANSI_GREY "%d" ANSI_WHITE, winningNumber);
+    } else {
+        printf(ANSI_GREEN "%d" ANSI_WHITE, winningNumber);
+    }
+
+    printf("\n");
+
+    // Stocker le dernier numéro gagnant
+    for (int i = MAX_NUMBERS_STORED - 1; i > 0; i--) {
         lastWinningNumbers[i] = lastWinningNumbers[i - 1];
     }
     lastWinningNumbers[0] = winningNumber;
+
     return winningNumber;
 }
 
@@ -350,166 +446,169 @@ int getTwoLines() {
     return twoLinesChoice;
 }
 
-void evaluateResult(int betType, int bet, int number, int color, int tier, int numCheval1, int numCheval2, int carreNum1, int carreNum2, int carreNum3, int carreNum4, int column, int columnsChoice, int lineChoice, int twoLinesChoice, int winningNumber, int *balance) {
+void evaluateResult(Bet bet, int winningNumber, int *balance) {
     int win = 0;
-    int firstNumInLine;
-    int firstNumInTwoLines;
-    int lastNumInTwoLines;
 
-    switch (betType) {
-        case 1:
-            if (winningNumber == number) 
-                {win = bet * 36;}
+    switch (bet.betType) {
+        case 1: // Chiffre spécifique
+            if (winningNumber == bet.specificNumber) 
+                win = bet.betAmount * 36;
             break;
 
-        case 2:
-        case 3:
-            if (color == getNumberColor(winningNumber)) 
-                {win = bet * 1;}
+        case 2: // Rouge
+        case 3: // Noir
+            if (bet.color == getNumberColor(winningNumber)) 
+                win = bet.betAmount * 2;
             break;
 
-        case 4:
-            if ((tier == 1 && winningNumber >= 1 && winningNumber <= 12) ||
-                (tier == 2 && winningNumber >= 13 && winningNumber <= 24) ||
-                (tier == 3 && winningNumber >= 25 && winningNumber <= 36)) 
-                {win = bet * 2;}
+        case 4: // Tiers
+            if ((bet.tier == 1 && winningNumber >= 1 && winningNumber <= 12) ||
+                (bet.tier == 2 && winningNumber >= 13 && winningNumber <= 24) ||
+                (bet.tier == 3 && winningNumber >= 25 && winningNumber <= 36)) 
+                win = bet.betAmount * 3;
             break;
 
-        case 5:
-            if (winningNumber == numCheval1 || winningNumber == numCheval2) 
-                {win = bet * 17;}
+        case 5: // Cheval
+            if (winningNumber == bet.numCheval1 || winningNumber == bet.numCheval2) 
+                win = bet.betAmount * 17;
             break;
 
-        case 6:
-            if (winningNumber == carreNum1 || winningNumber == carreNum2 || winningNumber == carreNum3 || winningNumber == carreNum4) 
-                {win = bet * 8;}
+        case 6: // Carre
+            if (winningNumber == bet.carreNum1 || winningNumber == bet.carreNum2 || 
+                winningNumber == bet.carreNum3 || winningNumber == bet.carreNum4) 
+                win = bet.betAmount * 8;
             break;
 
-        case 7: 
-            if ((column == 1 && winningNumber % 3 == 1) ||
-                (column == 2 && winningNumber % 3 == 2) ||
-                (column == 3 && winningNumber % 3 == 0 && winningNumber != 0)) 
-                {win = bet * 2;}
+        case 7: // Colonne
+            if ((bet.column == 1 && winningNumber % 3 == 1) ||
+                (bet.column == 2 && winningNumber % 3 == 2) ||
+                (bet.column == 3 && winningNumber % 3 == 0 && winningNumber != 0)) 
+                win = bet.betAmount * 3;
             break;
 
-        case 8: 
-            if ((columnsChoice == 1 && (winningNumber % 3 == 1 || winningNumber % 3 == 2)) ||
-                (columnsChoice == 2 && (winningNumber % 3 == 2 || (winningNumber % 3 == 0 && winningNumber != 0)))) 
-                {win = bet * 0.5;}
+        case 8: // Deux colonnes
+            if ((bet.twoColumnsChoice == 1 && (winningNumber % 3 == 1 || winningNumber % 3 == 2)) ||
+                (bet.twoColumnsChoice == 2 && (winningNumber % 3 == 2 || (winningNumber % 3 == 0 && winningNumber != 0)))) 
+                win = bet.betAmount * 1.5;
             break;
 
-        case 9: 
-            firstNumInLine = (lineChoice - 1) * 3 + 1;
+        case 9: // Ligne
+            int firstNumInLine = (bet.lineChoice - 1) * 3 + 1;
             if (winningNumber >= firstNumInLine && winningNumber < firstNumInLine + 3) 
-                {win = bet * 11;}
+                win = bet.betAmount * 11;
             break;
 
-        case 10: 
-            firstNumInTwoLines = (twoLinesChoice - 1) * 3 + 1;
-            lastNumInTwoLines = firstNumInTwoLines + 5; 
+        case 10: // Deux lignes
+            int firstNumInTwoLines = (bet.twoLinesChoice - 1) * 3 + 1;
+            int lastNumInTwoLines = firstNumInTwoLines + 5;
             if (winningNumber >= firstNumInTwoLines && winningNumber <= lastNumInTwoLines) 
-                {win = bet * 5;}
+                win = bet.betAmount * 5;
             break;
 
-        case 11:
+        case 11: // Passe
             if (winningNumber >= 19 && winningNumber <= 36) 
-                {win = bet * 1;}
+                win = bet.betAmount * 2;
             break;
 
-        case 12:
+        case 12: // Manque
             if (winningNumber >= 1 && winningNumber <= 18) 
-                {win = bet * 1;}
+                win = bet.betAmount * 2;
             break;
 
-        case 13:
+        case 13: // Pair
             if (winningNumber != 0 && winningNumber % 2 == 0) 
-                {win = bet * 1;}
+                win = bet.betAmount * 2;
             break;
-        case 14:
+
+        case 14: // Impair
             if (winningNumber != 0 && winningNumber % 2 != 0) 
-                {win = bet * 1;}
+                win = bet.betAmount * 2;
             break;
     }
 
     if (win > 0) {
-        printf("Vous avez gagne %d!\n", win);
+        printf("Seul les paris effectues entierement dans les 45 secondes sont pris en compte.\n");
+        printf("Vous avez gagné %d! (soit votre mise initiale plus vos gains) \n", win);
         *balance += win;
     } else {
-        printf("Vous avez perdu votre mise.\n");
-        *balance -= bet;
+        printf("Vous avez perdu votre mise de %d.\n", bet.betAmount);
     }
-
 }
 
 float roulette_game(float credits) {
     int balance = credits;
-    int bet, betType;
+    Bet bets[1000];
+    int numBets;
+    char playAgain;
     time_t start, end;
     float elapsed;
-    srand((unsigned int)time(NULL));
+    srand(time(NULL));
+
     RouletteIntroTexte();
-    printf("\n Bienvenue a la roulette! Vous avez %d pieces.\n", balance);                                                                                
+    printf("\nBienvenue à la roulette ! Vous avez %d pièces.\n", balance);
+    sleep(4);
+    printf("\n LA ROULETTE TOURNE TOUTE LES 45 SECONDES! \n");
+    printf("\n\n FAITES VOS JEUX! \n\n");
+    elapsed = 0;
+    do {
+        numBets = 0;
 
-
-    while (balance > 0) {
-        
-        bet = userbet(balance); // On suppose que userbet ne bloque pas et retourne immédiatement
-
-        if (bet == 0) {
-            break; // Sortie du jeu
-        }
-        start = time(NULL); // Commence le compte à rebours
-        betType = getBetType(); // Demandez le type de pari après la mise
+        // Collecte des paris
+        do {
+        start = time(NULL);
+        Bet bet = getUserBet(balance);
         end = time(NULL);
-        elapsed += difftime(end, start);
-        if (elapsed >= 30.0) {
+        elapsed += difftime(end, start);  // Mise à jour du temps écoulé
+
+        if (elapsed >= 45.0) {
             printf("\n\n RIEN NE VA PLUS! \n\n");
-            printf("Temps ecoule pour choisir le type de pari! Retour au menu.\n");
-            sleep(5);
-            break; // Retour menu
-        }
-        int number = 0, color = 0, tier = 0, numCheval1 = 0, numCheval2 = 0, carreNum1 = 0, carreNum2 = 0, carreNum3 = 0, carreNum4 = 0; 
-        int column = 0, twoColumnsChoice = 0, lineChoice = 0, twoLinesChoice = 0;
-
-        switch (betType) {
-            case 1:
-                number = getSpecificNumber();
-                break;
-            case 2:
-            case 3:
-                color = getColor(betType);
-                break;
-            case 4:
-                tier = getTier();
-                break;
-            case 5:
-                getChevalNumbers(&numCheval1, &numCheval2);
-                break;
-            case 6:
-                getCarreNumbers(&carreNum1, &carreNum2, &carreNum3, &carreNum4);
-                break;
-            case 7:
-                column = getColumn();
-                break;
-            case 8:
-                twoColumnsChoice = getTwoColumns();
-                break;
-            case 9:
-                lineChoice = getLine();
-                break;
-            case 10:
-                twoLinesChoice = getTwoLines();
-            break;
-
+            printf("Temps écoulé pour choisir votre pari! Attendez le prochain pari.\n");
+            sleep(3);
+            break; // Retour au menu
         }
 
-        int winningNumber = getWinningNumber();
-            evaluateResult(betType, bet, number, color, tier, numCheval1, numCheval2, carreNum1, carreNum2, carreNum3, carreNum4, column, twoColumnsChoice, lineChoice, twoLinesChoice, winningNumber, &balance);
-            printf("Votre solde est maintenant de %d pieces.\n", balance);
-            elapsed = 0;
-    }
+            if (bet.betAmount == 0) { 
+                return balance;
+            }
 
-    printf("Merci d'avoir joue a la roulette!\n\n");
+            if (bet.betAmount > 0) {
+                bets[numBets++] = bet;
+                balance -= bet.betAmount;
+            }
+
+            if (balance > 0 && numBets < 1000) {
+                printf("Voulez-vous placer un autre pari ? (o/n) : ");
+                scanf(" %c", &playAgain);
+            } else {
+                playAgain = 'n';
+            }
+
+        } while (playAgain == 'o' && balance > 0 && numBets < 1000);
+
+        // Tirage et évaluation des paris
+        if (numBets > 0) {
+            int winningNumber = getWinningNumber();
+
+            for (int i = 0; i < numBets; i++) {
+                evaluateResult(bets[i], winningNumber, &balance);
+            }
+        }
+
+        printf("Votre solde est maintenant de %d pièces.\n", balance);
+        elapsed = 0;
+
+        // Demander si le joueur veut rejouer
+        if (balance > 0) {
+            playAgain = 'o';
+            sleep(4);
+            clear_terminal();
+            printf("\n\n FAITES VOS JEUX! \n\n");
+        } else {
+            printf("Votre solde est insuffisant pour continuer à jouer.\n");
+            playAgain = 'n';
+        }
+
+    } while (playAgain == 'o' && balance > 0);
+
     return balance;
 }
-
