@@ -9,5 +9,5 @@ float gagnant(int total, int banque, float stack_update, float player_bet);
 void rejouer(float newstack);
 float mise();
 void Hand(int Hand[], int compteur);
-
+void printColor(const char *value, const char *suit, int type);
 #endif //BLACKJACK_H
