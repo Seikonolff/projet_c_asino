@@ -448,6 +448,9 @@ int getTwoLines() {
 
 void evaluateResult(Bet bet, int winningNumber, int *balance) {
     int win = 0;
+    int firstNumInLine;
+    int firstNumInTwoLines;
+    int lastNumInTwoLines;
 
     switch (bet.betType) {
         case 1: // Chiffre spécifique
@@ -493,14 +496,14 @@ void evaluateResult(Bet bet, int winningNumber, int *balance) {
             break;
 
         case 9: // Ligne
-            int firstNumInLine = (bet.lineChoice - 1) * 3 + 1;
+            firstNumInLine = (bet.lineChoice - 1) * 3 + 1;
             if (winningNumber >= firstNumInLine && winningNumber < firstNumInLine + 3) 
                 win = bet.betAmount * 11;
             break;
 
         case 10: // Deux lignes
-            int firstNumInTwoLines = (bet.twoLinesChoice - 1) * 3 + 1;
-            int lastNumInTwoLines = firstNumInTwoLines + 5;
+            firstNumInTwoLines = (bet.twoLinesChoice - 1) * 3 + 1;
+            lastNumInTwoLines = firstNumInTwoLines + 5;
             if (winningNumber >= firstNumInTwoLines && winningNumber <= lastNumInTwoLines) 
                 win = bet.betAmount * 5;
             break;
