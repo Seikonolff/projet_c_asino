@@ -4,11 +4,17 @@
 #include <stdlib.h> // pour rand() et srand()
 #include <time.h> // pour time()
 #include <string.h>
+#include <unistd.h> // pour sleep
 
 #define MAX_JOUEURS 1
 #define MISE_MINI 10
 
-// Fonction pour tirer une carte aléatoire entre 1 et 11 (as vaut 11 par défaut).
+#define RED  "\x1B[31m"
+#define GRN  "\x1B[32m"
+#define CYA  "\x1B[36m"
+#define WHT  "\033[37m"
+
+// Fonction pour tirer une carte aléatoire entre 2 et 11 (as vaut 11 par défaut).
 int tirerCarte(int tot) {
     int carte;
     int combi;
@@ -35,6 +41,7 @@ void rejouer(float newstack) {
 }
 
 float gagnant(int total, int banque, float stack_update, float player_bet) {
+    sleep(2);
     if (total > 21) {
         printf("Vous avez dépassé 21. Le croupier gagne.\n");
         stack_update -= player_bet;
@@ -63,6 +70,7 @@ int tourjoueur(int cartejoueur, int stackjoueur, float parijoueur, float *ptr) {
     }
     else {
         while (cartejoueur < 21) {
+            sleep(1);
             if (stackjoueur >= 2* parijoueur) { //Possibilité de doubler car stack suffisant
                 char choix;
                 printf("Voulez-vous tirer une carte de plus ou doubler ? (o/n/d) : ");
@@ -73,16 +81,16 @@ int tourjoueur(int cartejoueur, int stackjoueur, float parijoueur, float *ptr) {
                     int nouvelleCarte = tirerCarte(cartejoueur);
                     printf("Vous avez tiré : %d\n", nouvelleCarte);
                     cartejoueur += nouvelleCarte;
-                    printf("Votre main : %d\n", cartejoueur);
                     Hand(&nouvelleCarte,1);
+                    printf("Votre main : %d\n", cartejoueur);
                 } else if (choix == 'd'){
                     int nouvelleCarte = tirerCarte(cartejoueur);
-                    printf("Vous avez tiré : %d\n", nouvelleCarte);
                     cartejoueur += nouvelleCarte;
                     *ptr += parijoueur;
                     printf("Votre mise est maintenant de : %f\n", *ptr);
-                    printf("Votre main : %d\n", cartejoueur);
+                    printf("Vous avez tiré : %d\n", nouvelleCarte);
                     Hand(&nouvelleCarte,1);
+                    printf("Votre main : %d\n", cartejoueur);
                     break;
                 }
                 else {
@@ -99,8 +107,8 @@ int tourjoueur(int cartejoueur, int stackjoueur, float parijoueur, float *ptr) {
                     int nouvelleCarte = tirerCarte(cartejoueur);
                     printf("Vous avez tiré : %d\n", nouvelleCarte);
                     cartejoueur += nouvelleCarte;
-                    printf("Votre main : %d\n", cartejoueur);
                     Hand(&nouvelleCarte,1);
+                    printf("Votre main : %d\n", cartejoueur);
                 }
                 else {
                     break;
@@ -114,34 +122,68 @@ int tourjoueur(int cartejoueur, int stackjoueur, float parijoueur, float *ptr) {
 int croupier(int cartebanque, int HandC[]) {
     int i = 2;
     while (cartebanque < 17) {
+        sleep(1);
         int nouvelleCarte = tirerCarte(cartebanque);
         HandC[i] = nouvelleCarte;
         i += 1;
         printf("Le croupier a tiré : %d\n", nouvelleCarte);
         cartebanque += nouvelleCarte;
-        Hand(HandC,i);
-        printf("Main du croupier : %d\n", cartebanque);
     }
+    Hand(HandC,i);
+    printf("Main du croupier : %d\n", cartebanque);
     return cartebanque;
 }
 
 float mise() {
     float bet;
-    printf("Quel est votre mise ?");
-    scanf(" %f", &bet);
-    if (bet < MISE_MINI) {
-        printf("La mise minimale est de 10$\n");
-        return mise();
-    }
-    else {
-        return bet;
-    }
+
+    do {
+        printf("Quel est votre mise ? ");
+        if (scanf("%f", &bet) != 1) {
+            // Si la saisie n'est pas un nombre
+            printf("Veuillez entrer un montant valide.\n");
+            // Efface le tampon d'entrée pour éviter une boucle infinie en cas de saisie non numérique
+            while (getchar() != '\n');
+            continue;  // Retourne à la demande de mise
+        }
+
+        if (bet < MISE_MINI) {
+            printf("La mise minimale est de 10$\n");
+        } else {
+            return bet;
+        }
+
+    } while (1);  // Répète jusqu'à ce qu'une mise valide soit saisie
+
+    return 0;  // Cette ligne ne sera jamais atteinte, ajoutée pour éviter un avertissement du compilateur
+}
+
+void printColor(const char *value, const char *suit, int type) //type = 1 pour print une value 0 pour une couleur
+{
+    const char *color;
+
+    if(strcmp(suit, "♥") == 0)
+        color = RED;
+    else if (strcmp(suit, "♣") == 0)
+        color = GRN;
+    else if (strcmp(suit, "♦") == 0)
+        color = CYA;
+    else
+        color = WHT;
+    if(type)
+        printf("%s%-2s\033[0m", color, value);
+    else
+        printf("%s%s\033[0m", color, suit);
+        
 }
 
 void Hand(int Hand[],int compteur) {
     const char *suits[4] = {"♥", "♠", "♦", "♣"};
     
+
     for (int j = 0; j< compteur; j++) {
+        sleep(1);
+        const char *colori = suits[rand()% 4];
 
         if (Hand[j] == 11 || Hand[j] == 1) {
             const char *value = "A";
@@ -151,15 +193,21 @@ void Hand(int Hand[],int compteur) {
             printf("\n");
 
             // Imprime la valeur et le haut de la couleur de chaque carte
-            printf("|%-2s   | ", value); // %-2s pour aligner les valeurs à gauche avec deux caractères
+            printf("|");
+            printColor(value, colori, 1); // %-2s pour aligner les valeurs à gauche avec deux caractères
+            printf("   | ");
             printf("\n");
 
             // Imprime la couleur de chaque carte
-            printf("|  %s  | ", suits[rand()% 3]);
+            printf("|  ");
+            printColor(value, colori, 0); // %-2s pour aligner les valeurs à gauche avec deux caractères
+            printf("  | ");
             printf("\n");
 
             // Imprime la valeur et le bas de la couleur de chaque carte
-            printf("|   %-2s| ", value); // %-2s pour aligner les valeurs à gauche avec deux caractères
+            printf("|   ");
+            printColor(value, colori, 1); // %-2s pour aligner les valeurs à gauche avec deux caractères
+            printf("| ");
             printf("\n");
 
             // Imprime le bas de chaque carte
@@ -174,15 +222,21 @@ void Hand(int Hand[],int compteur) {
             printf("\n");
 
             // Imprime la valeur et le haut de la couleur de chaque carte
-            printf("|%-2s   | ", value); // %-2s pour aligner les valeurs à gauche avec deux caractères
+            printf("|");
+            printColor(value, colori, 1); // %-2s pour aligner les valeurs à gauche avec deux caractères
+            printf("   | ");
             printf("\n");
 
             // Imprime la couleur de chaque carte
-            printf("|  %s  | ", suits[rand()% 3]);
+            printf("|  ");
+            printColor(value, colori, 0); // %-2s pour aligner les valeurs à gauche avec deux caractères
+            printf("  | ");
             printf("\n");
 
             // Imprime la valeur et le bas de la couleur de chaque carte
-            printf("|   %-2s| ", value); // %-2s pour aligner les valeurs à gauche avec deux caractères
+            printf("|   ");
+            printColor(value, colori, 1); // %-2s pour aligner les valeurs à gauche avec deux caractères
+            printf("| ");
             printf("\n");
 
             // Imprime le bas de chaque carte
@@ -190,20 +244,29 @@ void Hand(int Hand[],int compteur) {
             printf("\n");
         }
         else {
+            char value[3]; // Assuming the maximum length of the value is 2 digits
+            sprintf(value, "%d", Hand[j]);
+
             // Imprime le haut de chaque carte
             printf("+-----+ ");
             printf("\n");
 
             // Imprime la valeur et le haut de la couleur de chaque carte
-            printf("|%-2d   | ", Hand[j]); // %-2d pour aligner les valeurs à gauche avec deux caractères
+            printf("|");
+            printColor(value, colori, 1); // %-2s pour aligner les valeurs à gauche avec deux caractères
+            printf("   | ");
             printf("\n");
 
             // Imprime la couleur de chaque carte 
-            printf("|  %s  | ", suits[rand()% 3]);
+            printf("|  ");
+            printColor(value, colori, 0); // %-2s pour aligner les valeurs à gauche avec deux caractères
+            printf("  | ");
             printf("\n");
 
             // Imprime la valeur et le bas de la couleur de chaque carte
-            printf("|   %-2d| ", Hand[j]); // %-2d pour aligner les valeurs à gauche avec deux caractères
+            printf("|   ");
+            printColor(value, colori, 1); // %-2s pour aligner les valeurs à gauche avec deux caractères
+            printf("| ");
             printf("\n");
 
             // Imprime le bas de chaque carte
@@ -213,6 +276,39 @@ void Hand(int Hand[],int compteur) {
     }
 }
 
+void assurance(float pari, float stack, int Maincroup[], int totjou[]){
+    char assur;
+    int totalCroup;
+    printf("La banque a un as !\n");
+    printf("Assurance ? (o/n)\n");
+    scanf(" %c", &assur);
+    if (strcmp(&assur, "o") == 0) {
+        stack -= pari/2;
+        printf("Vous avez choisi l'assurance en ajoutant la moitié de votre mise");
+        totalCroup = Maincroup[0];
+        Maincroup[1] = tirerCarte(totalCroup);
+        totalCroup += Maincroup[1];        
+        if (Maincroup[0] == 11 && Maincroup[1] == 10) {
+            printf("Le croupier a BlackJack vous récupérez votre mise");
+            rejouer(stack);
+        }
+        else {
+            totjou[0] = tourjoueur(totjou[0], stack, pari, &pari);
+
+            Hand(Maincroup, 2);
+            printf("Main du croupier : %d\n\n", totalCroup);
+               
+            // Tour du croupier.
+            totalCroup = croupier(totalCroup, Maincroup);
+
+
+            // Détermination des gagnants.
+            float update4 = gagnant(totjou[0], totalCroup, stack, pari);
+            stack = update4;
+            rejouer(stack);
+        }
+    }
+}
 
 float blackjack_game(float playerStack) {
     // Initialisation du générateur de nombres aléatoires.
@@ -220,16 +316,16 @@ float blackjack_game(float playerStack) {
 
     int totalJoueurs[MAX_JOUEURS] = {0};
     int totalCroupier = 0;
-    int nombreJoueurs;
+    int nombreJoueurs = 1;
     int HandCroupier[5];
 
-    printf("Entrez le nombre de joueurs (1-%d) : ", MAX_JOUEURS);
+    /*printf("Entrez le nombre de joueurs (1-%d) : ", MAX_JOUEURS);
     scanf("%d", &nombreJoueurs);
 
     if (nombreJoueurs < 1 || nombreJoueurs > MAX_JOUEURS) {
         printf("Nombre de joueurs non valide.\n");
         return playerStack;
-    }
+    }*/ //Pour plus de 1 joueur -> pas développé mais prévu dans le code
 
     if (playerStack < MISE_MINI) {
         printf("Vous n'avez pas assez d'argent veuillez aller à la banque si vous voulez jouer.");
@@ -237,7 +333,7 @@ float blackjack_game(float playerStack) {
     }
 
     float pari = mise();
-    //créé un pointeur pour le bet et l'utiliser dans tour joueur
+    
     int cartesJoueurs[MAX_JOUEURS][2] = {0};  // Tableau pour stocker les cartes des joueurs.
 
     // Distribution des cartes initiales pour chaque joueur et le croupier.
@@ -258,9 +354,12 @@ float blackjack_game(float playerStack) {
     }
 
     totalCroupier += tirerCarte(totalCroupier);
-    printf("Main du croupier: %d\n", totalCroupier);
     HandCroupier[0] = totalCroupier;
     Hand(HandCroupier,1);
+    printf("Main du croupier: %d\n", totalCroupier);
+    if (HandCroupier[0] == 11) {
+        assurance(pari, playerStack, HandCroupier, &totalJoueurs[0]);
+    }
 
 
     for (int i = 0; i < nombreJoueurs; i++) {
@@ -270,9 +369,10 @@ float blackjack_game(float playerStack) {
     HandCroupier[1] = tirerCarte(totalCroupier);
     totalCroupier += HandCroupier[1];
 
+
     for (int i = 0; i < nombreJoueurs; i++) {
-        printf("Deuxième carte du joueur %d : %d\n", i + 1, cartesJoueurs[i][1]);
         Hand(cartesJoueurs[i],2);
+        printf("Deuxième carte du joueur %d : %d\n", i + 1, cartesJoueurs[i][1]);
     }
 
     for (int i = 0; i < nombreJoueurs; i++) {
@@ -319,8 +419,9 @@ float blackjack_game(float playerStack) {
             else {  //Cas carte identiques mais ne souhaite pas split
                 totalJoueurs[i] = tourjoueur(totalJoueurs[i], playerStack, pari, &pari);
 
-                printf("Main du croupier : %d\n\n", totalCroupier);
                 Hand(HandCroupier, 2);
+                printf("Main du croupier : %d\n\n", totalCroupier);
+                
             
                 // Tour du croupier.
                 totalCroupier = croupier(totalCroupier, HandCroupier);
@@ -334,8 +435,9 @@ float blackjack_game(float playerStack) {
         else { //Cas classique du blackjack
             totalJoueurs[i] = tourjoueur(totalJoueurs[i], playerStack, pari, &pari);
 
+            //Hand(HandCroupier, 2);
             printf("Main du croupier : %d\n\n", totalCroupier);
-            Hand(HandCroupier, 2);   
+               
             // Tour du croupier.
             totalCroupier = croupier(totalCroupier, HandCroupier);
 
