@@ -4,14 +4,20 @@
 #include <time.h> // pour time()
 #include <stdio.h> // pour printf et scanf
 #include <string.h> // pour strcpy
-#include <unistd.h> //pour usleep (en microsecondes)
+#include <unistd.h> //pour sleep (en secondes)
 #include <math.h> //pour floor (arrondir a l'entier inférieur)
-
+#include <windows.h>
 #define nombre_item 4
+#define probabilite_tirage 10
 #define nombre_rouleaux 3
 #define mise_mini_slots 10
 #define true 1
 #define false 0
+#define negative -1
+#define tailorface 2
+#define recettes 8733
+
+int cdl; //compteur de lose
 
 enum ResultatJeu {
     ERREUR_TIRAGE = 0,
@@ -35,7 +41,7 @@ void affichage_stack(float stack_a_afficher){
     printf("|STACK: %10.2f $ |\n",stack_a_afficher);
     printf("%95.s", " ");
     printf("+--------------------+\n");
-    printf("\n \n");
+    printf("\n");
 }
 
 float mise_joueur(){
@@ -95,20 +101,129 @@ void init_aleatoire()
     srand(time(NULL));
 }
 
-int tirage_slot()
+int tirage_slot(int previous1, int previous2)
 {
-    return rand()%nombre_item;
+    int similarite;
+    int new_tirage;
+    if (previous1 < 0)
+        {return rand()%nombre_item;}
+        
+    similarite = rand()%probabilite_tirage;
+    if (previous2 < 0)
+    { 
+        if (similarite==0)
+            {return previous1;}
+        else 
+        {
+            new_tirage = rand()%nombre_item;
+            while (new_tirage == previous1)
+            {
+                new_tirage = rand()%nombre_item;
+            }
+            return new_tirage;
+        }
+    }
+    else {
+        if (similarite == 0)
+            {
+                if (rand()%tailorface == 0) {return previous1;}
+                else {return previous2;}
+            }
+        else {
+                new_tirage = rand()%nombre_item;
+                while (new_tirage == previous1 || new_tirage == previous2)
+                {
+                    new_tirage = rand()%nombre_item;
+                }
+                return new_tirage;
+        }
+        }
+}
+
+void tirage_machine(float pari){
+        for (int i = 0; i< nombre_rouleaux; i++)
+        {
+            switch (i)
+            {
+                case 0: rouleaux[i].item = tirage_slot(negative,negative); break;
+                case 1: rouleaux[i].item = tirage_slot(rouleaux[i-1].item, negative); break;
+                case 2: rouleaux[i].item = tirage_slot(rouleaux[i-1].item, rouleaux[i-2].item); break;
+                default: rouleaux[i].item = negative; break;
+            }
+        }
+    printf("%-20s |%-20s |%-20s |\n",affichage_item(0), affichage_item(1), affichage_item(2));
+    char* item1 = "########";
+    char* item2 = "########";
+    char* item3 = "########";
+    for (int k=0; k<3;k++){
+        float gain_jeu;
+        switch (k)
+        {
+        case 0: 
+            item1 = affichage_item(0);
+            break;
+        case 1:
+            item2 = affichage_item(1);
+            break;
+        case 2:
+            item3 = affichage_item(2);
+            gain_jeu = gain(pari, check_results());
+            break;
+        default:
+            break;
+        }
+        printf("⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⢁⣠⣄⡈⠙⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⢀⣿⣿⣿⣿⡄⠘⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠿⠛⠛⠛⠀⠈⠉⠉⠉⠉⠁⠀⠛⠛⠛⠻⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⠛⠋⣀⠀⠀⠤⠤⠦⠒⠚⠛⠛⠋⠉⠉⠉⠛⠛⠓⠒⠲⠤⠤⣀⣀⡈⠉⠛⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⣿⣿⣿⣿⣿⣿⣿⣿⠿⠋⠁⡀⠤⠖⠘⠉⣀⣀⣠⣤⣤⣶⣶⣾⣿⣿⣿⣿⣿⣿⣷⣶⣶⣦⣤⣄⣀⣀⠉⠛⠶⢤⣀⡈⠛⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⢽⣿⣿⣿⣿⡿⠛⠁⣠⠶⠋⢀⣠⣤⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣦⣄⡈⠙⠢⣄⡀⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⢸⣿⣿⣿⠋⢀⣤⠎⠁⣠⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣤⡈⠻⣦⡀⠙⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⢸⠿⡟⠁⣠⠞⠀⣠⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣦⠈⠻⣄⠈⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⠞⠎⠀⣴⠏⢀⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡀⠙⣇⠀⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⡟⠀⢸⡏⢀⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⠀⢹⣇⠀⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⡇⢀⣿⠀⢸⣿⣿⡿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⡇⠀⣿⠀⠈⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⠀⠾⠿⠤⠶⠶⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠿⠇⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⠄⠀⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⠀⢰⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⠄⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⢸⣿⣿⣿⣿⠟⠉⢁⣀⣈⠉⠉\n");
+        printf("⠂⠀⢏⠀⢰⣶⣶⣶⣶⣖⣶⣶⣶⣶⣶⣶⣖⣶⣶⣄⡲⣶⣶⣶⣶⣶⣶⣶⣶⣶⣖⣶⣶⣔⣲⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣀⠀⣿⠀⢸⣿⣿⣿⠃⢀⣾⣿⣿⣿⣷⠀\n");
+        printf("⠀⠀⢸⠀⢸⣿⡭⠍⠉⢉⣁⣈⣉⣉⣉⣁⣁⣀⠈⠹⣵⠀⢉⣉⣉⣉⣉⣉⣉⣀⣁⡀⠈⣭⡅⠀⣉⣉⣉⣉⣉⣉⣉⣉⣉⡉⠉⣿⣿⣏⠀⣿⠀⢸⣿⣿⣧⠀⢿⣿⣿⣿⣿⣿⠀\n");
+        printf("⠀⠀⣿⠀⢸⣿⡇⡆⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⢠⣾⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀⣷⣷⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⣿⣿⣿⠀⣿⠀⢸⣿⣿⣿⣄⠈⢿⣿⣿⣿⡿⠀\n");
+        printf("⡀⠀⣹⠀⢸⣿⣿⡇⢸%-8s⢸ ⢘⢸ ⢸%-8s⢸ ⣿⣿ ⡇%-8s⢸ ⣿⣿⣿⠀⣿⠀⢸⣿⣿⣿⡏⠀⠀⢸⣿⣿⣿⣿\n",item1, item2, item3);
+        printf("⠄⠀⣹⠀⢸⣿⣿⡇⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⢸⢸ ⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⣹⣿⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⣿⣿⣿⠀⣿⠀⢸⣿⣿⣿⡀⠀⠀⣿⣿⣿⣿⣿\n");
+        printf("⡄⠀⣿⠀⢸⣿⣿⡆⠀⠛⠛⠛⠛⠛⠛⠛⠛⠃⠀⢸⣿⠀⠘⠛⠛⠛⠛⠛⠛⠛⠛⠂⠀⣼⣿⠀⠙⠛⠛⠛⠛⠛⠛⠛⠛⠁⠀⣿⣿⣿⠀⣿⠀⢸⣿⣿⡇⠀⠀⣿⣿⣿⣿⣿⣿\n");
+        printf("⠆⠀⣿⠀⠸⠛⠛⠿⠆⠒⠒⠒⠒⠖⠶⠶⠶⠶⠶⠿⠿⠷⠖⠲⠶⠶⠶⠶⠶⠶⠶⠶⠶⠛⠻⠿⠶⠶⠶⠶⠶⠶⠶⠶⠾⠿⠿⠿⠿⠟⠀⣻⠀⢸⣿⣿⠀⠀⢀⣿⣿⣿⣿⣿⣿\n");
+        printf("⠁⠀⣿⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣿⠀⢸⣿⡏⠀⠀⢸⣿⣿⣿⣿⣿⣿\n");
+        printf("⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⢰⣶⣶⡆⠀⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⠂⠀⣿⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⣿⠀⢸⣿⣿⡇⠀⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⡁⠀⣿⠀⢰⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⠀⣿⠀⠘⠿⠿⠇⠨⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⠂⠀⣿⠀⢸⣿⣿⣿⡟⠉⠻⣿⣿⣿⣿⣿⣿⡟⠉⢻⣿⣿⣿⣿⣿⣿⠏⠙⣿⣿⣿⣿⣿⣿⡿⠉⠹⣿⣿⣿⣿⣿⣿⡟⠉⢻⣿⣿⣿⣿⠀⣿⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⠀⠀⣿⠀⢸⣿⠈⠙⠁⢀⠀⠉⠛⠛⠋⠉⠉⠀⠀⠈⠉⠛⢻⠛⠉⠁⢀⡀⠈⠙⠛⠉⠙⠉⠁⢀⠀⠉⠙⠛⠟⠛⠉⠀⡄⠈⠉⠛⢻⣿⠀⣿⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⠀⠀⣿⠀⢸⣿⣦⠀⠸⠯⠇⠀⣠⣾⣶⣀⠈⠹⠿⠍⠀⣴⣿⣦⡀⠈⠿⢟⠀⢠⣶⣷⣤⠀⠘⠿⠟⠀⢠⣾⣶⣄⠈⢹⠿⠃⠀⣴⣿⣿⠀⣿⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⠄⠀⣿⠀⢸⣿⣿⠀⢀⣀⡀⠀⢻⣿⣿⣟⠀⣀⣀⡀⠀⣿⣿⣿⡇⠀⣀⣀⠀⠘⣿⣿⣿⠁⢀⣀⡀⠀⢸⣿⣿⣿⠀⢀⣀⡀⠀⣿⣿⣿⠀⣿⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⡂⠀⣿⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⣿⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⡇⠀⣿⣀⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣉⣁⣀⣿⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⠄⠀⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⠂⠀⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⡆⠀⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⠀⢰⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("  ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇ ⣿GAIN : %9.2f⣿⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n",gain_jeu);
+        printf("⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⠄⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        if (k<2){
+            sleep(2);
+            clear_terminal();
+        }
+    }
 }
 
 char* affichage_item(int rouleau)
 {
     switch(rouleaux[rouleau].item)
         {
-            case 0: {item0="BELL";return item0;}
-            case 1: {item0="BAR";return item0;}
+            case 0: {item0="  BELL  ";return item0;}
+            case 1: {item0="   BAR  ";return item0;}
             case 2: {item0="CHERRIES";return item0;}
-            case 3: {item0="7";return item0;}
-            default: {item0="ERREUR";return item0;}
+            case 3: {item0="    7   ";return item0;}
+            default: {item0=" ERREUR ";return item0;}
         }
 }
 
@@ -194,27 +309,42 @@ float slots_game(float stack)
         scanf("%s",&tirage);
         clear_terminal();
         init_aleatoire();
-        printf("\n");
-
         // AFFICHAGE DE LA MACHINE A SOUS
-        for (int j=0; j<5; j++){
-        for (int i = 0; i< nombre_rouleaux; i++)
-        {
-            rouleaux[i].item = tirage_slot();
-        }
-        printf("%-20s |%-20s |%-20s |\n",affichage_item(0), affichage_item(1), affichage_item(2));
-        sleep(0.1);
-        }
+        tirage_machine(playerbet);
         // MACHINE A SOUS 
-
         profit = gain(playerbet, check_results());
         stack += profit;
         affichage_results(check_results(),profit);
-
-        printf("\n\n");
         affichage_stack(stack);
-        printf("Votre nouveau stack est %.2f $ \n", stack);
-        printf("\n\n\n\n\n");
+        //printf("Votre nouveau stack est %.2f $ \n", stack);
+        if (check_results()==1){cdl += 1;}
+        else{cdl = 0;}
+        if (cdl > 4){
+            printf("Vous avez perdu %d fois de suite, vous vous enervez...\n", cdl);
+            printf("Frapper la machine à sous ? (o/n)\n");
+            char frapper[10];
+            scanf("%s",&frapper);
+            if(frapper[0]=='o'||frapper[0]=='O')//on regarde le premier cara de la chaine
+            {
+                printf("Le patron du casino vous voit frapper la machine...\nLes vigiles arrivent.\n Insulter les vigiles ? (o/n)\n");
+                scanf("%s", &frapper);
+                if(frapper[0]=='o'||frapper[0]=='O')
+                {
+                    printf("Les vigiles s'énervent et vous vous faites virer du casino. Vous perdez tout votre argent...\n");
+                    stack = negative;
+                    sleep(5);
+                    return stack;
+                }
+                if (strcmp(frapper,"braquer")==0){
+                    printf("Vous sortez un flingue et braquez les vigiles.\nVous arrivez à prendre les recettes du jour.... 8733$ et vous quittez la machine à sous...\n");
+                    stack += recettes;
+                    sleep(5);
+                    return stack;
+                }
+                else {printf("Le patron du casino vous dit : 'ça va pour cette fois mais ne recommencez pas...'\n");}
+            }
+            cdl = 0;
+        }
         printf("Voulez vous continuer à jouer ? (o/n)\n");
         scanf("%s", &reponse);
         
@@ -226,10 +356,11 @@ float slots_game(float stack)
                 printf("Plus assez d'argent, retournez à la banque pour deposer des $!!(o)\n");
                 //sleep(4);
                 scanf("%s",&reponse);
+                cdl = 0;
                 return stack; break;
                 }
             //stack suffisant : on continue dans la boucle de jeu
             }
-        else { return stack; break;} //on retourne au lobby avec le return / sortie de la boucle
+        else { cdl = 0; return stack; break;} //on retourne au lobby avec le return / sortie de la boucle
     } 
 }  

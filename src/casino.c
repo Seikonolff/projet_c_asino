@@ -4,8 +4,13 @@
 #include "slots.h"
 #include "roulette.h"
 #include "stdio.h"
-//#include "strcpy.h"
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h> //pour sleep (en secondes)
+#include "database.h"
 
+#define negative -1
+//ajout de la possibilité de braquage
 Player player;
 
 void initialize_casino()
@@ -15,11 +20,10 @@ void initialize_casino()
     printf(" | | | || _> | |_ | <__| | ||     || _>   | | | | |  | | |   || _>  | <__|   ||__ || ||   || | | \n");
     printf(" |__/_/ |___>|___|`___/`___'|_|_|_||___>  |_| `___'  |_| |_|_||___> `___/|_|_|<___/|_||_|_|`___'\n");
 
-    printf("Veuillez entrer votre crédit initial\n");
-    scanf("%f",&player.credits);
-    //printf("%f\n",player.credits);
-    //player.name += "";
-
+    printf("Veuillez entrer votre nom\n");
+    scanf("%s", &player.name);
+    player.credits = 0;
+    arrivee_joueur(player.name, &player.credits);
     return;
 }
 
@@ -27,8 +31,8 @@ int lobby()
 {
     clear_terminal();
     affichage_stack(player.credits);
-    printf("Vous avez %2.f $.\n", player.credits);
-    printf("Veuillez sélectionner un jeu :\n1: Poker\n2: Blackjack\n3: Machine à sous\n4: Roulette\n5: Aller a la banque\n6: Quitter\n");
+    printf("Bonjour %s,\nVous avez %2.f $.\n",player.name, player.credits);
+    printf("\nVeuillez sélectionner un jeu :\n1: Poker\n2: Blackjack\n3: Machine à sous\n4: Roulette\n5: Aller a la banque\n6: Quitter\n");
 
         int choix;
         scanf(" %d", &choix);
@@ -45,6 +49,7 @@ int lobby()
             case 3:
                 printf("Vous avez choisi Machine à sous.\n");
                 player.credits = slots_game(player.credits);
+                if (player.credits == negative){player.credits = 0; update_player_credit(player.name, &player.credits); return 0;}
                 break;
             case 4:
                 printf("Vous avez choisi Roulette\n\n\n");
@@ -63,6 +68,7 @@ int lobby()
                 player.credits += depot;
                 break;
             case 6:
+                update_player_credit(player.name, &player.credits);
                 printf("Merci d'avoir joué! Au revoir!\n");
                 return 0;
                 break;
