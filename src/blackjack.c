@@ -14,7 +14,7 @@
 #define CYA  "\x1B[36m"
 #define WHT  "\033[37m"
 
-// Fonction pour tirer une carte aléatoire entre 1 et 11 (as vaut 11 par défaut).
+// Fonction pour tirer une carte aléatoire entre 2 et 11 (as vaut 11 par défaut).
 int tirerCarte(int tot) {
     int carte;
     int combi;
@@ -41,7 +41,7 @@ void rejouer(float newstack) {
 }
 
 float gagnant(int total, int banque, float stack_update, float player_bet) {
-    sleep(3);
+    sleep(2);
     if (total > 21) {
         printf("Vous avez dépassé 21. Le croupier gagne.\n");
         stack_update -= player_bet;
@@ -70,7 +70,7 @@ int tourjoueur(int cartejoueur, int stackjoueur, float parijoueur, float *ptr) {
     }
     else {
         while (cartejoueur < 21) {
-            sleep(2);
+            sleep(1);
             if (stackjoueur >= 2* parijoueur) { //Possibilité de doubler car stack suffisant
                 char choix;
                 printf("Voulez-vous tirer une carte de plus ou doubler ? (o/n/d) : ");
@@ -85,10 +85,10 @@ int tourjoueur(int cartejoueur, int stackjoueur, float parijoueur, float *ptr) {
                     printf("Votre main : %d\n", cartejoueur);
                 } else if (choix == 'd'){
                     int nouvelleCarte = tirerCarte(cartejoueur);
-                    printf("Vous avez tiré : %d\n", nouvelleCarte);
                     cartejoueur += nouvelleCarte;
                     *ptr += parijoueur;
                     printf("Votre mise est maintenant de : %f\n", *ptr);
+                    printf("Vous avez tiré : %d\n", nouvelleCarte);
                     Hand(&nouvelleCarte,1);
                     printf("Votre main : %d\n", cartejoueur);
                     break;
@@ -122,29 +122,40 @@ int tourjoueur(int cartejoueur, int stackjoueur, float parijoueur, float *ptr) {
 int croupier(int cartebanque, int HandC[]) {
     int i = 2;
     while (cartebanque < 17) {
-        sleep(2);
+        sleep(1);
         int nouvelleCarte = tirerCarte(cartebanque);
         HandC[i] = nouvelleCarte;
         i += 1;
         printf("Le croupier a tiré : %d\n", nouvelleCarte);
         cartebanque += nouvelleCarte;
-        Hand(HandC,i);
-        printf("Main du croupier : %d\n", cartebanque);
     }
+    Hand(HandC,i);
+    printf("Main du croupier : %d\n", cartebanque);
     return cartebanque;
 }
 
 float mise() {
     float bet;
-    printf("Quel est votre mise ?");
-    scanf(" %f", &bet);
-    if (bet < MISE_MINI) {
-        printf("La mise minimale est de 10$\n");
-        return mise();
-    }
-    else {
-        return bet;
-    }
+
+    do {
+        printf("Quel est votre mise ? ");
+        if (scanf("%f", &bet) != 1) {
+            // Si la saisie n'est pas un nombre
+            printf("Veuillez entrer un montant valide.\n");
+            // Efface le tampon d'entrée pour éviter une boucle infinie en cas de saisie non numérique
+            while (getchar() != '\n');
+            continue;  // Retourne à la demande de mise
+        }
+
+        if (bet < MISE_MINI) {
+            printf("La mise minimale est de 10$\n");
+        } else {
+            return bet;
+        }
+
+    } while (1);  // Répète jusqu'à ce qu'une mise valide soit saisie
+
+    return 0;  // Cette ligne ne sera jamais atteinte, ajoutée pour éviter un avertissement du compilateur
 }
 
 void printColor(const char *value, const char *suit, int type) //type = 1 pour print une value 0 pour une couleur
@@ -171,8 +182,8 @@ void Hand(int Hand[],int compteur) {
     
 
     for (int j = 0; j< compteur; j++) {
-        sleep(2);
-        const char *colori = suits[rand()% 3];
+        sleep(1);
+        const char *colori = suits[rand()% 4];
 
         if (Hand[j] == 11 || Hand[j] == 1) {
             const char *value = "A";
@@ -424,7 +435,7 @@ float blackjack_game(float playerStack) {
         else { //Cas classique du blackjack
             totalJoueurs[i] = tourjoueur(totalJoueurs[i], playerStack, pari, &pari);
 
-            Hand(HandCroupier, 2);
+            //Hand(HandCroupier, 2);
             printf("Main du croupier : %d\n\n", totalCroupier);
                
             // Tour du croupier.
