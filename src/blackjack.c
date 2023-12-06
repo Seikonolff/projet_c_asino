@@ -74,6 +74,10 @@ void rejouer(float newstack) {
     printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
     blackjack_game(newstack);
     }
+    else {
+        printf("Merci d'avoir joué !\n");
+        return;
+    }
 }
 
 float gagnant(int total, int banque, float stack_update, float player_bet) {
