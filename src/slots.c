@@ -30,7 +30,7 @@ slot rouleaux[nombre_rouleaux]; //définition d'un tableau rouleaux de 3 structu
 
 char* item0; //définition de l'item du rouleau X
 
-void clear_terminal(){
+void clear_terminal(){ //Fonction pour nettoyer visuellement le terminal
     for (int i=0; i<80; i++)
     {printf("\n");}
 }
@@ -44,19 +44,28 @@ void affichage_stack(float stack_a_afficher){
     printf("\n");
 }
 
-float mise_joueur(){
+float mise_joueur(){    //Fonction pour demander au joueur de miser
     float mise;
     printf("Combien voulez vous miser ?\n");
-    scanf("%f", &mise);
-    return mise;
+    do{
+        if (scanf("%f", &mise) !=1)
+            {printf("Veuillez entrer un montant valide.\n");
+            while (getchar() != '\n');
+            continue;
+            }
+        else 
+            {return mise;}
+        } 
+    while (1);
+    return 0;
 }
 
-float mise_conforme(float bet_joueur, float stack_joueur, float mise_mini_jeu){
+float mise_conforme(float bet_joueur, float stack_joueur, float mise_mini_jeu){ //Fonction pour vérifier que la mise joueur est correcte
     int playerbet_int;
     playerbet_int = (int)bet_joueur;
-    if (bet_joueur <= stack_joueur){
-        if (bet_joueur >= mise_mini_jeu){
-            if (bet_joueur != playerbet_int){
+    if (bet_joueur <= stack_joueur){        //comparaison si le joueur a assez d'argent pour miser sa mise
+        if (bet_joueur >= mise_mini_jeu){   //comparaison à la mise minimale du jeu
+            if (bet_joueur != playerbet_int){   // comparaison si le joueur mise des centimes
                 clear_terminal();
                 affichage_stack(stack_joueur);
                 printf("Le jeton le plus petit est 1$, vous ne pouvez pas miser des centimes.\n");
@@ -80,7 +89,7 @@ float mise_conforme(float bet_joueur, float stack_joueur, float mise_mini_jeu){
         }
 }
 
-float cas_conformite(int cas_conforme, float bet_joueur_2, float stack_joueur2, float mise_mini_cas){
+float cas_conformite(int cas_conforme, float bet_joueur_2, float stack_joueur2, float mise_mini_cas){ //Fonction de boucle pour vérifier les mises
     while (cas_conforme != 0){
         bet_joueur_2 = mise_joueur();
         cas_conforme = mise_conforme(bet_joueur_2, stack_joueur2, mise_mini_cas);
@@ -89,19 +98,19 @@ float cas_conformite(int cas_conforme, float bet_joueur_2, float stack_joueur2, 
     
 }
 
-void init_rouleaux() 
+void init_rouleaux()    //Initialise le nom des rouleaux (facultatif)
 {
 strcpy(rouleaux[0].nom_slot,"Rouleau 0");
 strcpy(rouleaux[1].nom_slot, "Rouleau 1");
 strcpy(rouleaux[2].nom_slot, "Rouleau 2");
 }
 
-void init_aleatoire()
+void init_aleatoire()   //intialise le "temps" du module random
 {
     srand(time(NULL));
 }
 
-int tirage_slot(int previous1, int previous2)
+int tirage_slot(int previous1, int previous2)   //définit un nombre pour chaque rouleau (un nmbre=un item)
 {
     int similarite;
     int new_tirage;
@@ -140,7 +149,7 @@ int tirage_slot(int previous1, int previous2)
         }
 }
 
-void tirage_machine(float pari){
+void tirage_machine(float pari){    //affiche la machine a sous et effectue le tirage en fonction des items précedents tirés
         for (int i = 0; i< nombre_rouleaux; i++)
         {
             switch (i)
@@ -215,7 +224,7 @@ void tirage_machine(float pari){
     }
 }
 
-char* affichage_item(int rouleau)
+char* affichage_item(int rouleau)   //affiche l'item tiré des rouleaux
 {
     switch(rouleaux[rouleau].item)
         {
@@ -227,7 +236,7 @@ char* affichage_item(int rouleau)
         }
 }
 
-int check_results() 
+int check_results()    //vérifie la situation en fonction du tirage 
 {
     for (int j=0; j<3; j++){
         if (affichage_item(j) == "ERREUR") //strcmp renvoie 0 si les deux chaines sont identiques
@@ -245,7 +254,7 @@ int check_results()
     return 0; //no gair nor loss
 }
 
-void affichage_results(int resultat, float benefice){
+void affichage_results(int resultat, float benefice){   //affiche les résultats au joueur
         switch (resultat)
         {
         case 0 : printf("Desole, erreur dans le tirage, vous n'avez rien perdu.\n");break;
@@ -256,7 +265,7 @@ void affichage_results(int resultat, float benefice){
         }
 }
 
-float gain(float mise, int resultat){
+float gain(float mise, int resultat){   //renvoie le gain associé au tirage/résultat
     switch (resultat)
     {
     case 0 : return mise; break; //cas d'une erreur lors du tirage
@@ -267,7 +276,7 @@ float gain(float mise, int resultat){
     }
 }
 
-float slots_game(float stack)
+float slots_game(float stack)       //boucle principale du jeu
 {
     char reponse[10];
     float playerbet;
@@ -277,8 +286,8 @@ float slots_game(float stack)
 
     clear_terminal();
     if (stack<mise_mini_slots){
-        printf("Vous n'avez pas assez d'argent, allez à la banque.(o)\n");
-        scanf("%s",&reponse);
+        printf("Vous n'avez pas assez d'argent, allez à la banque.\n");
+        sleep(3);
         return stack;}
 
     printf("Début du jeu de la machine à sous ! \n Vous avez %.2f $ \n", stack);
@@ -287,14 +296,27 @@ float slots_game(float stack)
     printf("Choisissez une action.\n\n");
     printf("0: Retourner au lobby.\n");
     printf("1: Jouer à la machine à sous.\n");
-    scanf("%d",&choix);
-    switch (choix)
-    {
-    case 0: clear_terminal(); printf("Merci d'être venu(e)!"); return stack; break;
-    case 1: break;
-    default:break;
-    }
 
+    do
+    {
+        if (scanf("%d", &choix) != 1){
+            printf("Erreur de saisie, veuillez recommencer.\n");
+            while(getchar() != '\n');
+            continue;
+        }
+        else {
+            break;
+        }
+
+    } while (1);
+
+    switch (choix)
+        {
+        case 0: clear_terminal(); printf("Merci d'être venu(e)!"); return stack; break;
+        case 1: break;
+        default:break;
+        }
+    
     while (true){
         clear_terminal();
         affichage_stack(stack);
@@ -316,7 +338,6 @@ float slots_game(float stack)
         stack += profit;
         affichage_results(check_results(),profit);
         affichage_stack(stack);
-        //printf("Votre nouveau stack est %.2f $ \n", stack);
         if (check_results()==1){cdl += 1;}
         else{cdl = 0;}
         if (cdl > 4){
@@ -353,9 +374,8 @@ float slots_game(float stack)
             if(stack<mise_mini_slots){
                 clear_terminal();
                 affichage_stack(stack);
-                printf("Plus assez d'argent, retournez à la banque pour deposer des $!!(o)\n");
-                //sleep(4);
-                scanf("%s",&reponse);
+                printf("Plus assez d'argent, retournez à la banque pour deposer des $!!\n");
+                sleep(4);
                 cdl = 0;
                 return stack; break;
                 }
