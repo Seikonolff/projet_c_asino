@@ -4,6 +4,17 @@
 #define POKER_ON 1
 #define POKER_OFF 0
 
+#define ROYAL_FLUSH    0
+#define	STRAIGHT_FLUSH  1
+#define	FOUR_OF_A_KIND  2
+#define	FULL_HOUSE      3
+#define	FLUSH           4
+#define	STRAIGHT        5
+#define	THREE_OF_A_KIND 6
+#define	TWO_PAIR        7
+#define	ONE_PAIR        8
+#define	HIGH_CARD       9
+
 typedef enum {
     PREFLOP,
     FLOP,
@@ -38,6 +49,7 @@ void dealHands(Card *deck, Card *playerHand, Card *dealerHand);
 void dealBoard(Card *deck, Card *board);
 void printCards(const Card *board, int numCards, int hidden);
 void printHiddenCard(int numCards);
+//void printDeck(Card deck[], int size);
 void printStack(float stack_a_afficher);
 void refreshDisplay(void);
 void printBettingBoard(const Bets *bets);
@@ -49,7 +61,5 @@ float playerBet(Bets *playerBoard, const float playerStack, const Stage stage );
 float gamePayout(const int playerHandValue, const int dealerHandValue, const Bets playerBoard);
 float poker_game(float playerCredits);
 void sortHand(Card *hand, int size);
-
-void printDeck(Card deck[], int size);
 
 #endif // POKER_H

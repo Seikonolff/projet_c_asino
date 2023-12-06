@@ -8,17 +8,6 @@
 
 #define DECK_SIZE 52
 
-#define ROYAL_FLUSH    0
-#define	STRAIGHT_FLUSH  1
-#define	FOUR_OF_A_KIND  2
-#define	FULL_HOUSE      3
-#define	FLUSH           4
-#define	STRAIGHT        5
-#define	THREE_OF_A_KIND 6
-#define	TWO_PAIR        7
-#define	ONE_PAIR        8
-#define	HIGH_CARD       9
-
 #define RED  "\x1B[31m"
 #define GRN  "\x1B[32m"
 #define CYA  "\x1B[36m"
@@ -140,6 +129,7 @@ void printHiddenCard(int numCards)
     printf("\n");
 }
 
+/*
 void printDeck(Card deck[], int size) {
     const char *suits[4] = {"coeur", "pique", "carreau", "trefle"};
     const char *values[13] = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
@@ -148,6 +138,7 @@ void printDeck(Card deck[], int size) {
         printf("Card %d: %s of %s, ID: %d\n", i + 1, values[deck[i].value], suits[deck[i].suit], deck[i].id);
     }
 }
+*/
 
 void printStack(float stack_a_afficher)
 {
@@ -155,17 +146,6 @@ void printStack(float stack_a_afficher)
     printf("+--------------------+\n");
     printf("%95.s", " ");
     printf("|STACK: $%10.2f  |\n",stack_a_afficher);
-    /*
-    if(payout>0)
-    {
-        printf("%95.s", " ");
-        printf("|        + $%6.2f|\n",payout);
-        printf("%95.s", " ");
-        printf("|          ----------|\n");
-        printf("%95.s", " ");
-        printf("|           $%6.2f|\n",stack_a_afficher + payout);
-    }
-    */
     printf("%95.s", " ");
     printf("+--------------------+\n");
     printf("\n \n");
@@ -215,22 +195,22 @@ void printRank(int rank, HandType type)
 
     switch (rank)
     {
-    case ROYAL_FLUSH:
+    case ROYAL_FLUSH :
         printf("%s une Quinte Royale !\n", owner);
         break;
-    case STRAIGHT_FLUSH:
+    case STRAIGHT_FLUSH :
         printf("%s une Quinte Suité !\n", owner);
         break;
-    case FOUR_OF_A_KIND:
+    case FOUR_OF_A_KIND :
         printf("%s un Carré !\n", owner);
         break;
-    case FULL_HOUSE:
+    case FULL_HOUSE :
         printf("%s un Full !\n", owner);
         break;
-    case FLUSH:
+    case FLUSH :
         printf("%s une Couleur !\n", owner);
         break;
-    case STRAIGHT:
+    case STRAIGHT :
         printf("%s une Suite !\n", owner);
         break;
     case THREE_OF_A_KIND :
@@ -547,7 +527,6 @@ float poker_game(float playerCredits)
         playerBoard.hasBet = 0;
         playerBoard.hasFolded = 0;
         currentCardIndex = 0;
-        refreshDisplay();
 
         printStack(playerCredits);
         int maxBet = playerCredits/2 ; // Deux fois la valeur du stack
@@ -609,12 +588,8 @@ float poker_game(float playerCredits)
         Stage stage = PREFLOP;
 
         shuffleDeck(deck); // mélanger le paquet
-        printDeck(deck, DECK_SIZE);
-        printf("card index = %d\n", currentCardIndex);
         dealHands(deck, playerHand, dealerHand); // distribue les mains
-        printf("card index = %d\n", currentCardIndex); 
         dealBoard(deck, board);
-        printf("card index = %d\n", currentCardIndex);
         displayGame(stage, playerHand, playerBoard, dealerHand, board);
         printStack(playerCredits);
         playerCredits -= playerBet(&playerBoard, playerCredits, stage);
@@ -651,12 +626,11 @@ float poker_game(float playerCredits)
         sleep(3);
         printStack(playerCredits);
         float payout = gamePayout(eval_7hand(playerSevenCardHand, PLAYER), eval_7hand(dealerSevenCardHand, DEALER), playerBoard);
-
-        playerCredits += payout; //il faut revoir si c'est necessaire ou comment améliorer cette partie
         if (payout > 0)
             printf("la banque vous crédite de %.2f \n",payout);
         else if (payout == 0)
             printf("Vous perdez $%d\n", playerBoard.bet + playerBoard.blind + playerBoard.bonus + playerBoard.play);
+        playerCredits += payout;
         printStack(playerCredits);
         sleep(2);
 
@@ -684,6 +658,7 @@ float poker_game(float playerCredits)
             pokerGame = POKER_OFF;
             return playerCredits;
         }
+        refreshDisplay();
     }
     
 }

@@ -11,7 +11,7 @@
 #define HEARTS   0x2000
 #define SPADES   0x1000
 
-#define ROYAL_FLUSH    0
+#define ROYAL_FLUSH     0
 #define	STRAIGHT_FLUSH  1
 #define	FOUR_OF_A_KIND  2
 #define	FULL_HOUSE      3
