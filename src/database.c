@@ -39,6 +39,7 @@ void arrivee_joueur(char *nom_joueur, float *stack_joueur)
     case 3:
     printf("Erreur dans la base de donnée, nous ne pouvons retrouver votre fichier client.");
     printf("Veuillez entrer votre crédit initial\n");
+    int valid_input = 0;
     do {
         if (scanf("%f", &credits) != 1) {
             // Si la saisie n'est pas un nombre
@@ -47,9 +48,12 @@ void arrivee_joueur(char *nom_joueur, float *stack_joueur)
             while (getchar() != '\n');
             continue;  // Retourne à la demande de mise
         }
-        *stack_joueur = credits;
-        break;
-    } while (1);
+        else {
+            valid_input = 1; // Set the flag to true if the input is valid
+        }
+    } while (!valid_input);
+    *stack_joueur = credits;
+    break;
     default: break;
     }
 }
