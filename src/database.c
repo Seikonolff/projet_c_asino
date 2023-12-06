@@ -5,43 +5,49 @@
 void arrivee_joueur(char *nom_joueur, float *stack_joueur)
 {
     float credits;
+    int valid_input = 0;
     switch (check_player_in_db(nom_joueur, stack_joueur))
     {
     case 0:
     printf("Erreur dans la base de donnée, vos crédits ne seront pas enregistrés.\n");
     printf("Veuillez entrer votre crédit initial\n");
     do {
-        if (scanf("%f", &credits) != 1) {
-            // Si la saisie n'est pas un nombre
+        if (scanf("%f", &credits) != 1 || credits <= 0) {
+            // Si la saisie n'est pas un nombre 
             printf("Veuillez saisir un montant valide.\n");
             // Efface le tampon d'entrée pour éviter une boucle infinie en cas de saisie non numérique
             while (getchar() != '\n');
             continue;  // Retourne à la demande de mise
         }
-        *stack_joueur = credits;
-        break;
-    } while (1);
+        else {
+            valid_input = 1; // Set the flag to true if the input is valid
+        }
+    } while (!valid_input);
+    *stack_joueur = credits;
+    break;
 
     case 1: break;
     case 2: 
     printf("Bienvenue %s, veuillez entrer votre crédit initial\n", nom_joueur);
     do {
-        if (scanf("%f", &credits) != 1) {
+        if (scanf("%f", &credits) != 1 || credits <= 0) {
             // Si la saisie n'est pas un nombre
             printf("Veuillez saisir un montant valide.\n");
             // Efface le tampon d'entrée pour éviter une boucle infinie en cas de saisie non numérique
             while (getchar() != '\n');
             continue;  // Retourne à la demande de mise
         }
-        *stack_joueur = credits;
-        break;
-    } while (1);
+        else {
+                valid_input = 1; // Set the flag to true if the input is valid
+            }
+        } while (!valid_input);
+    *stack_joueur = credits;
+    break;
     case 3:
     printf("Erreur dans la base de donnée, nous ne pouvons retrouver votre fichier client.");
     printf("Veuillez entrer votre crédit initial\n");
-    int valid_input = 0;
     do {
-        if (scanf("%f", &credits) != 1) {
+        if (scanf("%f", &credits) != 1 || credits <= 0) {
             // Si la saisie n'est pas un nombre
             printf("Veuillez saisir un montant valide.\n");
             // Efface le tampon d'entrée pour éviter une boucle infinie en cas de saisie non numérique
