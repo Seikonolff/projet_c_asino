@@ -35,47 +35,64 @@ int lobby()
     printf("\nVeuillez sélectionner un jeu :\n1: Poker\n2: Blackjack\n3: Machine à sous\n4: Roulette\n5: Aller a la banque\n6: Quitter\n");
 
         int choix;
-        scanf(" %d", &choix);
+        do {
+            if (scanf("%d", &choix) != 1) {
+                // Si la saisie n'est pas un nombre
+                printf("Veuillez entrer un numéro de jeu valide.\n");
+                // Efface le tampon d'entrée pour éviter une boucle infinie en cas de saisie non numérique
+                while (getchar() != '\n');
+                continue;  // Retourne à la demande de mise
+            }
 
-        switch (choix) {
-            case 1:
-                printf("Vous avez choisi Poker.\n");
-                player.credits = poker_game(player.credits);
-                break;
-            case 2:
-                printf("Vous avez choisi Blackjack.\n");
-                player.credits = blackjack_game(player.credits);
-                break;
-            case 3:
-                printf("Vous avez choisi Machine à sous.\n");
-                player.credits = slots_game(player.credits);
-                if (player.credits == negative){player.credits = 0; update_player_credit(player.name, &player.credits); return 0;}
-                break;
-            case 4:
-                printf("Vous avez choisi Roulette\n\n\n");
-                player.credits = roulette_game(player.credits);
-                break;
-            case 5:
-                clear_terminal();
-                affichage_stack(player.credits);
-                printf("Vous avez choisi la banque.\n Veuillez saisir le montant du depot.\n");
-                float depot;
-                scanf("%f", &depot);
-                while(depot <= 0){
-                    printf("Veuillez saisir un montal valide");
-                    scanf("%f", &depot);
-                }
-                player.credits += depot;
-                break;
-            case 6:
-                update_player_credit(player.name, &player.credits);
-                printf("Merci d'avoir joué! Au revoir!\n");
-                return 0;
-                break;
-            default:
-                printf("Sélection non valide. Veuillez choisir entre 1 et 6.\n");
-                break;
-        }
+            switch (choix) {
+                case 1:
+                    printf("Vous avez choisi Poker.\n");
+                    player.credits = poker_game(player.credits);
+                    break;
+                case 2:
+                    printf("Vous avez choisi Blackjack.\n");
+                    player.credits = blackjack_game(player.credits);
+                    break;
+                case 3:
+                    printf("Vous avez choisi Machine à sous.\n");
+                    player.credits = slots_game(player.credits);
+                    if (player.credits == negative){player.credits = 0; update_player_credit(player.name, &player.credits); return 0;}
+                    break;
+                case 4:
+                    printf("Vous avez choisi Roulette\n\n\n");
+                    player.credits = roulette_game(player.credits);
+                    break;
+                case 5:
+                    clear_terminal();
+                    affichage_stack(player.credits);
+                    printf("Vous avez choisi la banque.\n Veuillez saisir le montant du depot.\n");
+                    float depot;
+                    do {
+                        if (scanf("%f", &depot) != 1) {
+                            // Si la saisie n'est pas un nombre
+                            printf("Veuillez saisir un montant valide.\n");
+                            // Efface le tampon d'entrée pour éviter une boucle infinie en cas de saisie non numérique
+                            while (getchar() != '\n');
+                            continue;  // Retourne à la demande de mise
+                        }
+                        while(depot <= 0){
+                            printf("Veuillez saisir un montal valide");
+                            scanf("%f", &depot);
+                        }
+                        player.credits += depot;
+                        break;
+                    } while (1);
+
+                case 6:
+                    update_player_credit(player.name, &player.credits);
+                    printf("Merci d'avoir joué! Au revoir!\n");
+                    return 0;
+                    break;
+                default:
+                    printf("Sélection non valide. Veuillez choisir entre 1 et 6.\n");
+                    break;
+            } 
+        } while (1);
     return 1;
 }
 
