@@ -8,6 +8,5 @@ typedef struct {
 
 void initialize_casino(void);
 int lobby(void);
-void shutdown_casino(void);
 
 #endif //CASINO_H

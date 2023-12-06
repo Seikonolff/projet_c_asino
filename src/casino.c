@@ -96,7 +96,3 @@ int lobby()
             } 
     return 1;
 }
-
-void shutdown_casino() {
-    // Nettoyage et libération des ressources avant la fermeture du programme
-}
