@@ -160,7 +160,6 @@ void tirage_machine(float pari){    //affiche la machine a sous et effectue le t
                 default: rouleaux[i].item = negative; break;
             }
         }
-    printf("%-20s |%-20s |%-20s |\n",affichage_item(0), affichage_item(1), affichage_item(2));
     char* item1 = "########";
     char* item2 = "########";
     char* item3 = "########";

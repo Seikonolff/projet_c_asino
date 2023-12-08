@@ -333,7 +333,7 @@ float playerBet(Bets *playerBoard, const float playerStack, const Stage stage ) 
             switch (input)
             {
                 case 0 :
-                    printf("vous ne jouez pas.\n");
+                    printf("vous décidez de check.\n");
                     return 0;
                     break;
                 case 1 :
@@ -375,7 +375,7 @@ float playerBet(Bets *playerBoard, const float playerStack, const Stage stage ) 
             switch (input)
             {
                 case 0 :
-                    printf("vous ne jouez pas.\n");
+                    printf("vous décidez de check.\n");
                     return 0;
                     break;
                 case 1 :
@@ -403,9 +403,7 @@ float playerBet(Bets *playerBoard, const float playerStack, const Stage stage ) 
             printf("Voulez-vous jouer ? \n");
             printf("|| 0 pour check || ");
                 if (playerBoard->hasBet == 0 && playerStack > playerBoard->bet)
-                    printf("1 pour jouer 1x votre mise soit $%d || ", playerBoard->bet);
-                
-                printf("2 pour se coucher ||\n");
+                    printf("1 pour jouer 1x votre mise soit $%d || 2 pour se coucher ||", playerBoard->bet);
             do {
                 scanf(" %d", &input);
 
@@ -416,7 +414,7 @@ float playerBet(Bets *playerBoard, const float playerStack, const Stage stage ) 
             switch (input)
             {
                 case 0 :
-                    printf("vous ne jouez pas.\n");
+                    printf("vous décidez de check.\n");
                     return 0;
                     break;
                 case 1 :
@@ -435,9 +433,19 @@ float playerBet(Bets *playerBoard, const float playerStack, const Stage stage ) 
                         break;
                     }
                 case 2 :
-                    printf("Vous vous couchez\nBonne nuit...\n");
-                    playerBoard->hasFolded = 1;
-                    return 0;
+                    if(playerBoard->hasBet == 0)
+                    {
+                        printf("Vous vous couchez\nBonne nuit...\n");
+                        playerBoard->hasFolded = 1;
+                        return 0;
+                    }
+                    else
+                    {
+                        printf("Option invalide.\n");
+                        return 0;
+                        break;
+                    }
+                    
                     break;
                 default :
                     break;
@@ -466,18 +474,37 @@ float gamePayout(const int playerHandValue, const int dealerHandValue, const Bet
         {0, 0}                  //rang 9 : Hauteur
     };
 
-    //avant de faire quoi que ce soit on regarde si le joueur s'est couché
-    if(playerBoard.hasFolded == 1)
-    {
-        printf("Vous vous êtes fold.\nVous récupérez votre mise de la case bonus.\n");
-        return 0 + playerBoard.bonus;
-    }
-
     int playerHandRank = hand_rank(playerHandValue);
     int dealerHandRank = hand_rank(dealerHandValue);
 
+    //avant de faire quoi que ce soit on regarde si le joueur s'est couché
+    if(playerBoard.hasFolded == 1)
+    {
+        printf("Vous vous êtes fold.\n");
+        printRank(playerHandRank, PLAYER);
+        if (playerHandRank <= THREE_OF_A_KIND) //si la combinaison est un brelan ou mieux on indique au joueur que son bonus a été payée
+        {
+            printf("La banque vous paye la mise sur bonus ! x%2.f !\n",payouts[playerHandRank].bonusMultiplier);
+            return 0 + playerBoard.bonus*payouts[playerHandRank].bonusMultiplier;  
+        }     
+        else
+        {
+            printf("La banque vous recrédite votre mise sur bonus.\n");
+            return 0 + playerBoard.bonus;
+        }
+           
+            
+    }    
+
     printRank(playerHandRank, PLAYER);
     printRank(dealerHandRank, DEALER);
+
+    //puis si la banque ne se qualifie (une paire ou mieux)
+    if(dealerHandRank >= ONE_PAIR)
+        {
+            printf("La banque ne se qualifie pas.\n");
+            return playerBoard.bet + playerBoard.play + playerBoard.blind*payouts[playerHandRank].blindMultiplier + playerBoard.bonus*payouts[playerHandRank].bonusMultiplier;
+        }
 
     if (playerHandRank < dealerHandRank) {
             printf("Le joueur gagne !\n");
@@ -492,7 +519,7 @@ float gamePayout(const int playerHandValue, const int dealerHandValue, const Bet
                 return playerBoard.bonus*payouts[playerHandRank].bonusMultiplier;
             }
             else if (playerHandValue < dealerHandValue)
-            {
+            {  
                 printf("le joueur gagne a la hauteur !\n");
                 return 2*(playerBoard.bet + playerBoard.play) + playerBoard.blind*payouts[playerHandRank].blindMultiplier + playerBoard.bonus*payouts[playerHandRank].bonusMultiplier;
             }
