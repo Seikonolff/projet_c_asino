@@ -165,6 +165,7 @@ void tirage_machine(float pari){    //affiche la machine a sous et effectue le t
     char* item3 = "########";
     for (int k=0; k<3;k++){
         float gain_jeu;
+        gain_jeu = 0;
         switch (k)
         {
         case 0: 
