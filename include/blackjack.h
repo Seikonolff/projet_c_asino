@@ -14,7 +14,7 @@ Carte tirerCarte(Carte jeu[], int *indice);
 int croupier(int cartebanque, Carte HandC[], Carte jeu[], int *indicecarte);
 int tourjoueur(int cartejoueur, int stackjoueur, float parijoueur, float *ptr, Carte jeu[], int *indicecarte, Carte mainjoueur[]);
 float gagnant(int total, int banque, float stack_update, float player_bet);
-void rejouer(float newstack);
+float rejouer(float newstack);
 void assurance(float pari, float stack, Carte Maincroup[], int totjou, Carte jeu[], int *indicecarte, Carte mainjou[]);
 float mise();
 void Hand(Carte Hand[],int compteur);

@@ -66,7 +66,7 @@ Carte tirerCarte(Carte jeu[], int *indice) {
     }
 }*/
 
-void rejouer(float newstack) {
+float rejouer(float newstack) {
     char jouer;
     printf("Voulez-vous rejouer ? (o/n)\n");
     scanf(" %c",&jouer);
@@ -74,9 +74,13 @@ void rejouer(float newstack) {
     printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
     blackjack_game(newstack);
     }
-    else {
+    else if (jouer == 'n') {
         printf("Merci d'avoir joué !\n");
-        return;
+        return newstack;
+    }
+    else {
+        printf("Veuillez entrer une réponse valide.\n");
+        rejouer(newstack);
     }
 }
 
@@ -85,18 +89,18 @@ float gagnant(int total, int banque, float stack_update, float player_bet) {
     if (total > 21) {
         printf("Vous avez dépassé 21. Le croupier gagne.\n");
         stack_update -= player_bet;
-        printf("Votre stack est maintenant de : %f\n", stack_update);
+        printf("Votre stack est maintenant de : %.2f\n", stack_update);
         return stack_update;
     } else if (banque > 21 || total > banque) {
         printf("Vous avez gagné !\n");
         float gain = player_bet;
         stack_update += gain;
-        printf("Votre stack est maintenant de : %f\n",stack_update);
+        printf("Votre stack est maintenant de : %.2f\n",stack_update);
         return stack_update;
     } else if (banque > total) {
         printf("Le croupier gagne dommage...\n");
         stack_update -= player_bet;
-        printf("Votre stack est maintenant de : %f\n",stack_update);
+        printf("Votre stack est maintenant de : %.2f\n",stack_update);
         return stack_update;
     } else {
         printf("Égalité entre vous et le croupier !\n");
