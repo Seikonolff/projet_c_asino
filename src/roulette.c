@@ -25,7 +25,7 @@
 #define ANSI_RED   "\x1B[31m"
 #define ANSI_GREY "\x1B[30m"
 #define ANSI_GREEN "\x1B[32m"
-#define ANSI_WHITE "\033[37m"
+#define ANSI_WHITE "\x1B[37m"
 #define ANSI_BLINK   "\x1B[5m"
 #define ANSI_NOBLINK "\x1B[25m"
 
