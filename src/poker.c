@@ -320,7 +320,7 @@ float playerBet(Bets *playerBoard, const float playerStack, const Stage stage ) 
             }
             printf("Voulez-vous jouer ?\n");
             printf("Mise mini de 3x ou 4x la mise de base.\n");
-            printf("|| 0 pour ne pas check || 1 pour jouer 3x votre mise soit $%d || 2 pour jouer 4x votre mise soit $%d || \n", 3*playerBoard->bet, 4*playerBoard->bet);
+            printf("|| 0 pour check || 1 pour jouer 3x votre mise soit $%d || 2 pour jouer 4x votre mise soit $%d || \n", 3*playerBoard->bet, 4*playerBoard->bet);
             int input;
             do {
                 scanf(" %d", &input);
@@ -492,18 +492,16 @@ float gamePayout(const int playerHandValue, const int dealerHandValue, const Bet
             printf("La banque vous recrédite votre mise sur bonus.\n");
             return 0 + playerBoard.bonus;
         }
-           
-            
     }    
 
     printRank(playerHandRank, PLAYER);
     printRank(dealerHandRank, DEALER);
 
     //puis si la banque ne se qualifie (une paire ou mieux)
-    if(dealerHandRank >= ONE_PAIR)
+    if(dealerHandRank > ONE_PAIR)
         {
             printf("La banque ne se qualifie pas.\n");
-            return playerBoard.bet + playerBoard.play + playerBoard.blind*payouts[playerHandRank].blindMultiplier + playerBoard.bonus*payouts[playerHandRank].bonusMultiplier;
+            return playerBoard.bet + 2*playerBoard.play + playerBoard.blind*payouts[playerHandRank].blindMultiplier + playerBoard.bonus*payouts[playerHandRank].bonusMultiplier;
         }
 
     if (playerHandRank < dealerHandRank) {
